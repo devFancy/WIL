@@ -17,7 +17,7 @@
 
 수많은 객체를 애그리거트로 묶어서 바라보면 상위 수준에서 도메인 모델 간의 관계를 파악할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-3-1.png)
+![](./img/ddd-start-3-1.png)
 
 위 **그림 3.3** 을 통해  모델을 보다 잘 이해할 수 있고 애그리거트 단위로 일관성을 관리하기 때문에, 복잡한 도메인을 단순한 구조로 만들어준다.
 
@@ -27,7 +27,7 @@
 
 즉, 애그리거트는 독립된 객체 군이며 각 애그리거트는 자기 자신만을 관리한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-3-2.png)
+![](./img/ddd-start-3-2.png)
 
 예를 들어, 상품과 리뷰를 살펴보자.
 
@@ -41,7 +41,7 @@
 
 애그리거트에 속한 모든 객체가 일관된 상태를 유지하려면 애그리거트 전체를 관리할 주체가 필요하다. 이 책임을 지는 것이 `애그리거트의 루트 엔티티`이다. 애그리거트에 속한 객체는 애그리거트 루트 엔티티에 직접 또는 간접적으로 속하게 된다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-3-3.png)
+![](./img/ddd-start-3-3.png)
 
 주문 애그리거트에서 루트 역할을 하는 엔티티는 Order 이다.
 
@@ -52,7 +52,7 @@ OrderLine, Shippinginfo, Orderer 등 주문 애그리거트에 속한 모델은 
 - 애그리거트 루트는 인터페이스 역할을 하기 때문에 **도메인 기준**으로 구현해야 한다.
 - 이는 애그리거트의 내부 구현을 숨겨서 애그리거트 단위로 구현을 캡슐화할 수 있도록 돕는다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-3-4.png)
+![](./img/ddd-start-3-4.png)
 
 ### 트랜잭션 범위
 
@@ -101,7 +101,7 @@ ID 참조를 사용하면 모든 객체가 참조로 연결되지 않고 한 애
 
 애그리거트별로 다른 구현 기술을 사용하는 것도 가능해진다. 중요한 데이터인 주문 애그리거트는 RDBMS에 저장하고 조회 성능이 중요한 상품 애그리거트는 NoSQL에 저장할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-3-5.png)
+![](./img/ddd-start-3-5.png)
 
 ID 참조 방식을 사용하면서 N+1 조회와 같은 문제가 발생하지 않도록 하려면 `조회 전용 쿼리`를 사용하면 된다.
 

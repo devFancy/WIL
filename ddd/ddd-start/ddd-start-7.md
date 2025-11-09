@@ -113,7 +113,7 @@ public class OrderService {
 
 * 도메인 서비스의 개수가 많거나 엔티티나 밸류와 같은 다른 구성요소와 명시적으로 구분하고 싶다면, domain 패키지 밑에 domain.model, domain.service, domain.repository와 같이 하위 패키지를 구분하여 위치시켜도 된다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-7-1.png)
+![](./img/ddd-start-7-1.png)
 
 
 또한, 도메인 서비스의 로직이 고정되어있지 않은 경우 도메인 서비스 자체를 **인터페이스로 구현**하고 이를 구현한 클래스를 둘 수 있다.
@@ -126,7 +126,7 @@ public class OrderService {
 
 * 이를 통해 특정 구현에 종속되는 것을 방지할 수 있고 도메인 영역에 대한 테스트가 쉬워진다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-7-2.png)
+![](./img/ddd-start-7-2.png)
 
 
 ---

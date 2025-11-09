@@ -20,7 +20,7 @@
 
 2장에서 언급한 것처럼 리포지토리 인터페이스는 애그리거트와 같이 도메인 영역에 속하고 리포지토리를 구현한 클래스는 인프라 영역에 속한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-1.png)
+![](./img/ddd-start-4-1.png)
 
 
 ## 4.3 엔티티와 밸류 매핑
@@ -36,7 +36,7 @@
 
 주문 애그리거트로 예를 들면, 주문 애그리거트의 루트 엔티티는 Order 이고 이 애그리거트에 속한 Orderer와 ShippingInfo 는 밸류이다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-2.png)
+![](./img/ddd-start-4-2.png)
 
 주문 애그리거트에서 루트 엔티티인 Order는JPA의 `@Entity`로 매핑한다.
 
@@ -87,7 +87,7 @@ public class Order {
 
 Order와 OrderLine을 저장하기 위한 테이블은 ［그림 4.4］와 같이 매핑 가능하다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-3.png)
+![](./img/ddd-start-4-3.png)
 
 ### 4.3.8 별도 테이블에 저장하는 밸류 매핑
 
@@ -104,13 +104,13 @@ Order와 OrderLine을 저장하기 위한 테이블은 ［그림 4.4］와 같�
 - 예를 들어, Article 과 ArticleContent가 있는데,
 - 여기서 ArticleContent 테이블의 ID 컬럼이 식별자이므로 엔티티로 착각해서 Article과 1대1 연관으로 매핑할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-4.png)
+![](./img/ddd-start-4-4.png)
 
 - 하지만 ArticleContent 는 Article의 내용을 담고 있는 밸류로 생각하는 것이 맞다.
 - ID는 식별자이긴 하지만 이 식별자를 사용하는 이유는 Article 테이블의 데이터와 연결하기 위함이지 **ArticleContent 를 위한 별도 식별자가 필요하기 때문은 아니다.**
 - 따라서 ArticleContent 를 밸류로 보고 접근하면 모델은 아래 그림과 같다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-5.png)
+![](./img/ddd-start-4-5.png)
 
 
 ## 4.5 애그리거트의 영속성 전파
@@ -136,7 +136,7 @@ priate List<Image> images = new ArrayListo<>();
 
 또한 JPA에 특화된 애너테이션을 모두 지우고 인프라에 JPA를 연동하기 위해 클래스를 추가한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-4-6.png)
+![](./img/ddd-start-4-6.png)
 
 이러한 구조를 가지면 구현 기술을 변경하더라도 도메인이 받는 영향을 최소화할 수 있다.
 

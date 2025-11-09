@@ -24,11 +24,11 @@
 
 아래 그림 9.2와 같이 바운디드 컨택스트는 기업의 팀 조직 구조(규모)에 따라 결정되기도 한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-9-1.png)
+![](./img/ddd-start-9-1.png)
 
 만약 규모가 작은 조직 또는 기업이라면 아래 그림 9.3과 같이 여러 하위 도메인을 한 개의 바운디드 컨텍스트에서 구현할 수도 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-9-2.png)
+![](./img/ddd-start-9-2.png)
 
 이런 경우에는 하위 도메인마다 구분되는 패키지를 갖도록 구현해서 하위 도메인을 위한 모델이 서로 뒤섞이지 않도록 하는 것이 중요하다.
 
@@ -43,7 +43,7 @@
 
 명령 기능과 내용을 조회하는 쿼리 기능을 위한 모델을 구분하는 패턴으로, 아래 그림 9.7과 같이 상태 변경과 관련된 기능은 도메인 모델 기반으록 ㅜ현하고, 조회 기능은 서비스-DAO를 이용해서 구현할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-9-3.png)
+![](./img/ddd-start-9-3.png)
 
 
 ### 9.4 바운디드 컨텍스트 통합
@@ -87,7 +87,7 @@
 
 * 상류 팀은 각 하류 컴포넌트의 요구사항을 수용하는 단일 API를 만들어 이를 공개하고, 각 하류 팀은 공개된 API를 사용해서 검색 기능을 구현한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-9-4.png)
+![](./img/ddd-start-9-4.png)
 
 #### 안티코럽션 계층
 
@@ -103,7 +103,7 @@
 
 아래 그림 9.19 처럼 ResSystemClient 는 외부 시스템과의 연동을 처리하는데 외부 시스템의 도메인 모델이 내 도메인 모델을 침범하지 않도록 막아주는 역할을 한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-9-5.png)
+![](./img/ddd-start-9-5.png)
 
 이러한 계층 덕분에 하류 컨텍스트는 외부의 변화에 영향을 받지 않고 자신의 모델 순수성을 지킬 수 있다.
 
@@ -126,7 +126,7 @@
 
 이벤트 관련 구성 요소는 아래 그림 10.3과 같이 네 개의 구성 요소를 가진다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-10-1.png)
+![](./img/ddd-start-10-1.png)
 
 * 구성 요소: 이벤트, 이벤트 생성 주체, 이벤트 디스패처(이벤트 퍼블리셔), 이벤트 핸들러(이벤트 구독자)
 
@@ -173,7 +173,7 @@
 
 이처럼 이벤트를 사용하면 아래 그림 10.6과 같이 표현할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-10-2.png)
+![](./img/ddd-start-10-2.png)
 
 
 ### 10.3 이벤트, 핸들러, 디스패처 구현
@@ -262,7 +262,7 @@ public class OrderCanceledEventHandler {
 
 이벤트 처리 흐름을 정리하면 아래 그림 10.7과 같다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-10-3.png)
+![](./img/ddd-start-10-3.png)
 
 위 그림과 같이 응용 서비스와 동일한 트랜잭션 범위 내에서 이벤트 핸드러를 실행하고 있다.
 
@@ -375,7 +375,7 @@ public void handle(OrderCanceledEvent event) {
 
 `CQRS`는 상태를 변경하는 명령을 위한 모델과 상태를 제공하는 조회를 위한 모델을 분리하는 패턴이다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-11-1.png)
+![](./img/ddd-start-11-1.png)
 
 CQRS는 복잡한 도메인에 적합하다. 도메인이 복잡할 수록 명령 기능과 조회 기능이 다루는 데이터 범위에 차이가 난다.
 
@@ -389,13 +389,13 @@ CQRS를 사용하면 각 모델에 맞는 구현 기술을 선택할 수 있다.
 
 아래 그림 11.4은 명령 모델과 조회 모델의 설계 예를 보여준다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-11-2.png)
+![](./img/ddd-start-11-2.png)
 
 또한, 아래 그림 11.5와 같이 명령 모델과 조회 모델이 서로 다른 데이터 저장소를 사용할 수도 있다.
 
 명령 모델은 트랜잭션을 지원하는 RDBMS를 사용하고, 조회 모델은 조회 성능이 좋은 메모리 기반 NoSQL을 사용할 수도 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-11-3.png)
+![](./img/ddd-start-11-3.png)
 
 두 저장소 간 데이터 동기화는 10장에서 배운 **이벤트를 활용해서 처리**한다.
 
