@@ -26,7 +26,7 @@
 - 식별자를 가진다. e.g. 주문의 식별자는 주문번호
 - 식별자는 바뀌지 않는다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-1-1.png)
+![](./img/ddd-start-1-1.png)
 
 
 > 식별자 생성
@@ -43,11 +43,11 @@
     - 예를 들어, Money 타입은 아래와 같이 돈 계산을 위한 기능을 추가할 수 있다.
     - Money를 사용하는 코드는 이제 ‘정수 타입 연산’이 아니라 ‘돈 계산’이라는 의미로 코드를 작성할 수 있다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-1-2.png)
+![](./img/ddd-start-1-2.png)
 
 - 밸류 객체의 데이터를 변경할 때는 변경한 데이터를 갖는 새로운 밸로 객체를 생성하는 방식을 선호한다.
 
-![](/book/Starting-with-Domain-Driven-Design/img/Starting-with-Domain-Driven-Design-1-3.png)
+![](./img/ddd-start-1-3.png)
 
 ### 도메인 모델에 set 메서드 넣지 않기
 
