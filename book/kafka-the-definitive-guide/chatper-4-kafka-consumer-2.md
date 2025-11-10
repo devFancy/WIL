@@ -42,7 +42,6 @@
 
 이 설정은 컨슈머의 최대 지연 시간을 제어하는 데 사용된다.
 
-
 ### max.poll.records
 
 `poll()` 메서드를 한 번 호출할 때 가져오는 **최대 메시지 개수**를 지정한다. (기본값: 500)
@@ -89,7 +88,6 @@
 
 * `max.poll.interval.ms`은 컨슈머의 **메시지 처리 로직**이 일을 하고 있는지(Progress) 감시하는 역할이다.
 
-
 #### 리밸런싱 방지하기 위한 방법
 
 `max.poll.interval.ms` 설정을 잘못 다루면 컨슈머 그룹에서 리밸런싱이 발생할 수 있다.
@@ -97,7 +95,6 @@
 `max.poll.records`를 비정상적으로 높게 설정하고, `max.poll.interval.ms`를 총 처리 시간보다 낮게 설정하면 리밸런싱이 발생할 수 있다.
 
 이를 위해 애플리케이션의 총 처리 시간을 고려해서 `max.poll.records` 를 낮게 설정하거나 `max.poll.interval.ms` 를 늘리는 방안을 고려한다.
-
 
 ## 파티션 할당 전략
 
@@ -132,7 +129,6 @@
 
 * 메시지 유실: 실제 처리한 메시지보다 **이후 오프셋**이 커밋된 상태에서 장애가 발생하면, 리밸런스 후 다음 컨슈머가 커밋된 오프셋부터 읽기 시작하여 중간 메시지들이 유실된다.
 
-
 ### auto.offset.reset
 
 컨슈머 그룹이 특정 파티션에 대해 저장된 오프셋 없이 처음으로 읽기를 시작하거나, 기존 오프셋이 더 이상 유효하지 않을 때 어떻게 동작할지를 결정한다.
@@ -145,7 +141,6 @@
 
 * `none`: 유효한 오프셋이 없으면 예외(Exception)를 발생시킨다.
 
-
 ### enable.auto.commit
 
 `poll()` 메서드가 주기적으로 오프셋을 자동으로 커밋할지 여부를 결정한다. (기본값: true)
@@ -156,12 +151,13 @@
 
     * 이때 컨슈머는 메시지의 실제 처리 성공 여부는 확인하지 않으므로 처리 중 장애가 발생하면 해당 메시지는 유실될 수 있다.
 
-* `false` (수동 커밋): 개발자가 직접 커밋 시점을 제어하여 신뢰성을 높인다.
+* `false` (수동 커밋): 대부분의 개발자는 직접 커밋 시점을 제어하여 신뢰성을 높이고자 한다.
+
+    * **애플리케이션이 명시적으로 커밋하려 할 때만 오프셋이 커밋**되게 할 수 있다.
 
     * `commitSync()`나 `commitAsync()` 같은 API를 사용하여, 메시지 처리가 성공적으로 완료되었음을 보장한 후에만 오프셋을 커밋한다.
 
-    * 이는 메시지 유실을 방지하지만, 처리 로직과 커밋 사이에 장애가 발생하면 중복이 발생할 수 있다 (유실보다는 중복이 더 안전한 선택일 때가 많다).
-
+    * 이는 메시지 유실을 방지하지만, 처리 로직과 커밋 사이에 장애가 발생하면 중복이 발생할 수 있다.
 
 ## 실제 프로젝트에 적용하기: 쿠폰 시스템 Consumer 설정
 
@@ -172,6 +168,7 @@
 > KafkaConsumerConfig.java
 
 ```java
+
 @Configuration
 public class KafkaConsumerConfig {
 
@@ -180,43 +177,43 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String, CouponIssueMessage> consumerFactory() {
-      JsonDeserializer<CouponIssueMessage> deserializer = new JsonDeserializer<>(CouponIssueMessage.class);
-      deserializer.setRemoveTypeHeaders(false);
-      deserializer.addTrustedPackages("*");
-      deserializer.setUseTypeMapperForKey(true);
-
-      // 공통 필수 설정
-      Map<String, Object> config = new HashMap<>();
-      config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-      config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-      config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
-      config.put(ConsumerConfig.GROUP_ID_CONFIG, "group_1");
-
-      // 1. 신뢰성 관련 설정
-      // 1-1) 오프셋 수동 커밋 설정 -> 메시지 처리 완료 후 애플리케이션이 직접 커밋 시점을 제어하여, 메시지 유실을 방지.
-      config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-      // 1-2) 새로운 컨슈머 그룹이 처음 토픽을 읽을 때, 가장 오래된 메시지부터 읽도록 설정
-      config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-      // 2. 안정성 관련 설정
-      // 2-1) 컨슈머가 브로커(그룹 코디네이터)에게 하트비트를 보내지 않고 버틸 수 있는 최대 시간(기본값: 10,000 ms = 10초)
-      config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
-      // 2-2) 컨슈머가 얼마자 자주 하트비트를 보낼지 결정하는 주기. (기본값: 3,000ms = 3초)
-      config.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000);
-      // 2-3) poll() 간 최대 시간. 메시지 처리 시간보다 넉넉하게 설정. (기본값: 300,000ms = 5분)
-      config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 600000); // 10분
-      // 2-4) 리밸런싱 시 중단을 최소화하는 '협력적 리밸런스' 전략 사용.
-      config.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
-      
-      // 3. 성능 관련 설정
-      // 3-1) poll() 요청 시 브로커가 응답해야 할 최소 데이터 크기. (기본값: 1 byte)
-      config.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 2);
-      // 3-2) poll() 요청 시 브로커에서 대기할 최대 시간. (기본값: 500ms)
-      config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 1000);
-      // 3-3) 컨슈머가 브로커로부터 한 번의 poll() 호출로 가져올 최대 메시지 개수. (기본값: 500)
-      config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1000);
+        JsonDeserializer<CouponIssueMessage> deserializer = new JsonDeserializer<>(CouponIssueMessage.class);
+        deserializer.setRemoveTypeHeaders(false);
+        deserializer.addTrustedPackages("*");
+        deserializer.setUseTypeMapperForKey(true);
   
-      return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
+        // 공통 필수 설정
+        Map<String, Object> config = new HashMap<>();
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializer);
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "group_1");
+  
+        // 1. 신뢰성 관련 설정
+        // 1-1) 오프셋 수동 커밋 설정 -> 메시지 처리 완료 후 애플리케이션이 직접 커밋 시점을 제어하여, 메시지 유실을 방지.
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        // 1-2) 가장 최신 메시지, 즉 컨슈머가 실행된 이후에 들어오는 메시지부터 읽기 시작한다.
+        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+  
+        // 2. 안정성 관련 설정
+        // 2-1) 컨슈머가 브로커(그룹 코디네이터)에게 하트비트를 보내지 않고 버틸 수 있는 최대 시간 (기본값: 45,000 ms = 45초)
+        config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000); // 30초로 설정
+        // 2-2) 컨슈머가 얼마자 자주 하트비트를 보낼지 결정하는 주기. (기본값: 3,000ms = 3초)
+        config.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 10000); // 10초로 설정
+        // 2-3) poll()로 가져온 메시지를 처리하는 데 허용된 최대 시간. (기본값: 300,000ms = 5분)
+        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 600000); // 10분
+        // 2-4) 리밸런싱 시 중단을 최소화하는 '협력적 리밸런스' 전략 사용.
+        config.put(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG, "org.apache.kafka.clients.consumer.CooperativeStickyAssignor");
+  
+        // 3. 성능 관련 설정
+        // 3-1) poll() 요청 시 브로커가 응답해야 할 최소 데이터 크기. (기본값: 1 byte)
+        config.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 2);
+        // 3-2) poll() 요청 시 브로커에서 대기할 최대 시간. (기본값: 500ms)
+        config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 1000);
+        // 3-3) 컨슈머가 브로커로부터 한 번의 poll() 호출로 가져올 최대 메시지 개수. (기본값: 500)
+        config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1000);
+  
+        return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
     }
 
     @Bean
@@ -229,7 +226,7 @@ public class KafkaConsumerConfig {
 
         // 신뢰성: AckMode를 MANUAL로 지정하여 수동 커밋 활성화
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-        
+
         // 성능: 토픽의 파티션 수와 일치시켜 병렬 처리 성능을 최적화
         factory.setConcurrency(3);
 
@@ -249,15 +246,16 @@ public class KafkaConsumerConfig {
 
 * `ENABLE_AUTO_COMMIT_CONFIG`를 `false`로, `AckMode`를 `MANUAL`로 설정했다.
 
-    * 이 조합을 통해 카프카가 자동으로 오프셋을 커밋하는 것을 막고, `@KafkaListener`에서 비즈니스 로직이 완전히 성공했을 때만 `ack.acknowledge()`를 호출하여 직접 오프셋을 커밋할 수 있다.
+    * 이 조합을 통해 카프카가 자동으로 오프셋을 커밋하는 것을 막고, `@KafkaListener`에서 비즈니스 로직이 완전히 성공했을 때만 `ack.acknowledge()`를 호출하여 직접 오프셋을 커밋할
+      수 있다.
 
     * 이는 메시지 유실을 방지하는 확실한 방법이다.
 
-* `AUTO_OFFSET_RESET_CONFIG`는 `earliest`로 설정했다.
+* `AUTO_OFFSET_RESET_CONFIG`는 `latest`로 설정했다.
 
     * 이를 통해 새로운 컨슈머 그룹이 서비스를 시작하거나 오프셋 정보가 유실되었을 때,
 
-    * 토픽의 가장 처음부터 모든 메시지를 처리하도록 하여 의도치 않게 데이터를 건너뛰는 상황을 방지한다.
+    * 컨슈머가 실행된 이후에 들어오는 메시지부터 읽기 시작한다.
 
 > 안정성
 
@@ -293,13 +291,15 @@ public class KafkaConsumerConfig {
 
         * 3번 창구(텔러) → 3번 신청서 묶음 전담
 
-    * 그 결과, 3개의 창구에서 동시에 가입 신청(메시지)이 처리되므로, 이론적으로 전체 처리 속도가 3배로 향상된다. 이처럼 최대 성능을 내기 위해서는 보통 `Concurrency` 값을 파티션 개수와 동일하게 맞춘다.
+    * 그 결과, 3개의 창구에서 동시에 가입 신청(메시지)이 처리되므로, 이론적으로 전체 처리 속도가 3배로 향상된다. 이처럼 최대 성능을 내기 위해서는 보통 `Concurrency` 값을 파티션 개수와
+      동일하게 맞춘다.
 
 * 효율적인 데이터 가져오기를 위해 `poll` 관련 설정을 튜닝했다.
 
     * `MAX_POLL_RECORDS_CONFIG`를 1000으로 높여 한 번에 대량의 메시지를 가져오도록 하고,
 
-    * `FETCH_MAX_WAIT_MS_CONFIG`를 1000ms(1초)로, `FETCH_MIN_BYTES_CONFIG`를 2바이트로 설정하여 트래픽이 적을 때도 **최대 1초간 기다리며 최소 2바이트 이상의 데이터를 최대한 모아** 한 번에 가져오도록 했다.
+    * `FETCH_MAX_WAIT_MS_CONFIG`를 1000ms(1초)로, `FETCH_MIN_BYTES_CONFIG`를 2바이트로 설정하여 트래픽이 적을 때도 **최대 1초간 기다리며 최소 2바이트 이상의
+      데이터를 최대한 모아** 한 번에 가져오도록 했다.
 
     * 이러한 설정은 약간의 지연 시간(Latency)을 감수하는 대신, 불필요한 네트워크 통신을 줄여 시스템의 전체적인 **처리량(Throughput)을 극대화**한다.
 
