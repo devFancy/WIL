@@ -2,7 +2,7 @@
 
 ## 개발자 커리어의 다양성 (feat. 대기업만 다녀본 개발자의 고민)
 
-> [해당 영상](https://www.youtube.com/watch?v=DwW8B9irRhM)
+> [해당 영상](https://www.youtube.com/watch?v=DwW8B9irRhM) / 날짜: 2025. 11. 03
 
 당신이 5년뒤 무엇이 되고 싶은가? 역으로 궁금하다 -> 핵심!
 
@@ -29,7 +29,7 @@
 
 ## 개발자의 미래 커리어를 설계 하는 방법
 
-> [해당 영상](https://www.youtube.com/watch?v=wv6MWFvrnh4)
+> [해당 영상](https://www.youtube.com/watch?v=wv6MWFvrnh4) / 날짜: 2025. 09. 22
 
 결론: **나를 이해하는 시간을 열심히 갖자.**
 → 최소 하루에 한 시간 정도 가져야 한다. (e.g. 자기전에 30분 정도 ‘나’에 대해 생각해보기)
@@ -64,7 +64,7 @@
 
 ## 중고 신입의 이력서와 면접
 
-> [해당 영상](https://www.youtube.com/watch?v=3242mGtevrM)
+> [해당 영상](https://www.youtube.com/watch?v=3242mGtevrM) / 날짜: 2025. 04. 07
 
 - **`이직사유` + `지원동기`**
 
@@ -90,7 +90,7 @@
 
 ## 개발자 신입/이직시 주의할 점, 적응 잘하는 법
 
-> [해당 영상](https://www.youtube.com/watch?v=55VpiezltQM)
+> [해당 영상](https://www.youtube.com/watch?v=55VpiezltQM) / 날짜: 2024. 11. 18.
 
 신입 개발자 주의할 점
 - 혼자서 해결하려 하지 말고 질문을 잘하자.
@@ -120,7 +120,7 @@
 
 ## 대용량 트래픽 경험이 없는 개발자의 이직 준비 + 트래픽이 전부는 아니다.
 
-> [해당 영상](https://www.youtube.com/watch?v=mUjTrcDrxRk)
+> [해당 영상](https://www.youtube.com/watch?v=mUjTrcDrxRk) / 날짜: 2023. 12. 28.
 
 만들고 싶은 서비스를 만들자! -> 핵심은 직접 부딪혀보는 경험이다.
 
@@ -147,7 +147,7 @@
 
 ## 백엔드에서 따닥막기 + 적정/점진적 성장 엔지니어링
 
-> [해당 영상](https://www.youtube.com/watch?v=fTEaZJ9l1nM)
+> [해당 영상](https://www.youtube.com/watch?v=fTEaZJ9l1nM) / 날짜: 2023. 11. 16.
 
 핵심은 최소한의 리소스로 최대의 효율을 뽑아내는 '적정 엔지니어링' 이다.
 
@@ -170,7 +170,7 @@
 
 ## 올바른 성능 테스트란 무엇일까요?
 
-> [해당 영상](https://www.youtube.com/watch?v=20dhBGPQ6aA)
+> [해당 영상](https://www.youtube.com/watch?v=20dhBGPQ6aA) / 날짜: 2024. 1. 22.
 
 질문 1: 성능 테스트 시 트래픽 설정 팁이 있을까요?
 
