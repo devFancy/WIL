@@ -140,10 +140,10 @@ fun main() {
 
 ```kotlin
 class Person(
-    // val은 읽기 전용으로 private 필드와 getter 를 제공한다.
-    val name: String,
-    // var은 변경 가능하므로 private 필드와 getter, setter 를 제공한다.
-    var age: Integer,
+        // val은 읽기 전용으로 private 필드와 getter 를 제공한다.
+        val name: String,
+        // var은 변경 가능하므로 private 필드와 getter, setter 를 제공한다.
+        var age: Integer,
 )
 
 val person = Person("fancy", 28)
@@ -169,29 +169,29 @@ enum class Color {
 ```kotlin
 // 함수의 반환값으로 when 식을 직접 사용한다.
 fun getColor(color: Color) =
-  when(color) {
-    Color.RED -> "Red"
-    Color.ORANGE -> "Orange"
-    Color.YELLOW -> "Yellow"
-  }
+        when (color) {
+            Color.RED -> "Red"
+            Color.ORANGE -> "Orange"
+            Color.YELLOW -> "Yellow"
+        }
 
 fun getColor2(color: Color): String {
-  return when (color) {
-    Color.RED, Color.ORANGE, Color.YELLOW -> "${color.name}"
-  }
+    return when (color) {
+        Color.RED, Color.ORANGE, Color.YELLOW -> "${color.name}"
+    }
 }
 
 // 모든 분기 식에서 만족하는 조건을 찾을 수 없다면 else 분기를 계산한다.
 fun getColor3(color1: Color, color2: Color, color3: Color) =
-  when {
-    (color1 == Color.RED || color2 == Color.ORANGE || color3 == Color.YELLOW) -> "RED ORANGE YELLOW"
-    else -> throw RuntimeException()
-  }
+        when {
+            (color1 == Color.RED || color2 == Color.ORANGE || color3 == Color.YELLOW) -> "RED ORANGE YELLOW"
+            else -> throw RuntimeException()
+        }
 
 fun main() {
-  println(getColor(Color.YELLOW)) // 결과: Yellow
-  println(getColor2(Color.YELLOW)) // 결과: YELLOW
-  println(getColor3(Color.RED, Color.ORANGE, Color.YELLOW)) // 결과: RED ORANGE YELLOW
+    println(getColor(Color.YELLOW)) // 결과: Yellow
+    println(getColor2(Color.YELLOW)) // 결과: YELLOW
+    println(getColor3(Color.RED, Color.ORANGE, Color.YELLOW)) // 결과: RED ORANGE YELLOW
 }
 ```
 
@@ -207,16 +207,17 @@ fun main() {
 
 ```kotlin
 interface Expr
+
 // Num, Sum 에 있는 프로퍼티가 val 로 지정되어 있으므로 스마트 캐스팅을 지원한다.
 class Num(val value: Int) : Expr
 class Sum(val left: Expr, val right: Expr) : Expr
 
 fun eval(e: Expr): Int =
-    when (e) {
-        is Num -> e.value
-        is Sum -> eval(e.left) + eval(e.right)
-        else -> throw IllegalArgumentException()
-    }
+        when (e) {
+            is Num -> e.value
+            is Sum -> eval(e.left) + eval(e.right)
+            else -> throw IllegalArgumentException()
+        }
 
 fun main() {
     val sum = Sum(Num(3), Num(2))
@@ -238,7 +239,6 @@ fun main() {
  */
 ```
 
-
 ## 2.4 이터레이션
 
 > for 루프의 다양한 사용법을 정리했다.
@@ -246,30 +246,30 @@ fun main() {
 ```kotlin
 // 범위를 쓸 때는 `..` 연산자를 사용한다.
 fun main() {
-  // 1부터 10까지 출력
-  for (i in 1..10) {
-    println(i) // 결과: 1, 2, 3, ..., 10
-  }
+    // 1부터 10까지 출력
+    for (i in 1..10) {
+        println(i) // 결과: 1, 2, 3, ..., 10
+    }
 
-  // 1부터 10까지 2씩 증가
-  for (i in 1..10 step 2) {
-    println(i) // 결과: 1, 3, 5, 7, 9
-  }
+    // 1부터 10까지 2씩 증가
+    for (i in 1..10 step 2) {
+        println(i) // 결과: 1, 3, 5, 7, 9
+    }
 
-  // 10부터 1까지 2씩 감소
-  for (i in 10 downTo 1 step 2) {
-    print("$i, ") // 결과: 10, 8, 6, 4, 2
-  }
+    // 10부터 1까지 2씩 감소
+    for (i in 10 downTo 1 step 2) {
+        print("$i, ") // 결과: 10, 8, 6, 4, 2
+    }
 
-  // map의 key, value를 for문으로 풀어낼 수 있다.
-  for ((key, value) in mutableMapOf(Pair("A", 1))) {
-    println("$key: $value") // 결과: A: 1
-  }
+    // map의 key, value를 for문으로 풀어낼 수 있다.
+    for ((key, value) in mutableMapOf(Pair("A", 1))) {
+        println("$key: $value") // 결과: A: 1
+    }
 
-  // withIndex를 활용하면 리스트의 index, 값을 가져올 수 있다.
-  for ((index, value) in mutableListOf(1, 2, 3).withIndex()) {
-    println("$index: $value")
-  }
+    // withIndex를 활용하면 리스트의 index, 값을 가져올 수 있다.
+    for ((index, value) in mutableListOf(1, 2, 3).withIndex()) {
+        println("$index: $value")
+    }
 }
 ```
 
@@ -278,7 +278,7 @@ fun main() {
 ```kotlin
 fun main() {
     println(isLetter('q')) // 결과: true
-    println("K" in "A".."Z" ) // 결과: true
+    println("K" in "A".."Z") // 결과: true
 }
 
 fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z' // a <= c && c <= z로 변환된다.
@@ -301,7 +301,7 @@ fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z' // a <= c && c <= z로 �
 
 - 자바와 달리 코틀린 컬렉션 인터페이스가 디폴트 값으로 `읽기 전용`이라는 사실을 기억하자.
 - 코틀린에서는 함수의 디폴트 파라미터 값은 `함수 선언` 쪽에 인코딩된다는 사실을 기억하자.
-  - 자바에서는 디폴트 파라미터 값이라는 개념이 존재하지 않는다.
+    - 자바에서는 디폴트 파라미터 값이라는 개념이 존재하지 않는다.
 
 **최상위 프로퍼티**
 
@@ -310,23 +310,24 @@ fun isLetter(c: Char) = c in 'a'..'z' || c in 'A'..'Z' // a <= c && c <= z로 �
 ```kotlin
 const var opCount = 0 //top level property
 fun performOperation() {
-	opCount++
-	// ...
+    opCount++
+    // ...
 }
 ```
 
-- 위의 코드와 같이 const 키워드를 사용하면 → 자바에서의 public static final  필드로 노출한 것과 같다.
+- 위의 코드와 같이 const 키워드를 사용하면 → 자바에서의 public static final 필드로 노출한 것과 같다.
 
 **확장 함수**
 
-- 코틀린 언어를 자바 프로젝트에 통합하는 경우, 코틀린으로 직접 변환할 수 없거나 변환하지 못한 기존 자바 코드를 처리할 수 있어야 한다. 이때 자바 API 를 재작성하지 않는 것이 효율적인데, 이런 경우 확장 함수를 사용한다.
+- 코틀린 언어를 자바 프로젝트에 통합하는 경우, 코틀린으로 직접 변환할 수 없거나 변환하지 못한 기존 자바 코드를 처리할 수 있어야 한다. 이때 자바 API 를 재작성하지 않는 것이 효율적인데, 이런 경우 확장
+  함수를 사용한다.
 - `확장 함수`란 어떤 클래스의 멤버 메서드인 것처럼 호출할 수 있지만 그 클래스의 밖에 선언된 함수다.
 
 ```kotlin
-fun String.lastChar() : Char = this.get(this.length - 1)
+fun String.lastChar(): Char = this.get(this.length - 1)
 // String -> 수신 객체 타입(receiver type), this -> 수신 객체(receiver object)
 
-fun String.lastChar2(): Char = get(length -1)
+fun String.lastChar2(): Char = get(length - 1)
 // 수신 객체 멤버를 this 없이 접근할 수 있다.
 
 fun main() {
@@ -337,18 +338,18 @@ fun main() {
 ```
 
 - 위의 코드처럼 확장 함수를 사용하면 확장하고 싶은 클래스의 메서드나 프로퍼티에 직접 접근할 수 있다.
-  - 확장 함수가 캡슐화를 깨지는 않는다는 사실을 기억하자.
+    - 확장 함수가 캡슐화를 깨지는 않는다는 사실을 기억하자.
 
 - 확장 함수는 정적 메서드와 같은 특성을 가진다. → 확장 함수를 하위 클래스에 오버라이드 할 수 없다.
-  - **클래스의 멤버가 아니기 때문에** 오버라이드가 불가능하다.
-  - 확장 함수는 `정적(static)` 메서드로 컴파일한다는 사실을 기억하자.
+    - **클래스의 멤버가 아니기 때문에** 오버라이드가 불가능하다.
+    - 확장 함수는 `정적(static)` 메서드로 컴파일한다는 사실을 기억하자.
 
 ```kotlin
 open class View {
     open fun click() = println("View clicked")
 }
 
-class Button: View() {
+class Button : View() {
     override fun click() = println("Button clicked") // 오버라이드 가능 -> 런타임에 실제 객체의 타입에 맞는 함수가 호출된다.
 }
 
@@ -363,10 +364,45 @@ fun main() {
 ```
 
 - 위의 코드처럼 View 타입에 해당하는 showOff 확장 함수가 호출된다.
-  - showOff()는 View 나 Button 클래스 내부에 존재하는 함수가 아니다.
-  - 실제 클래스 바깥에 선언된 헬퍼 함수에 가깝다.
-  - 코틀린이 컴파일할 때 이코드는 자바의 정적 메서드로 인식한다.
-  - 컴파일 시점에 변수의 선언 타입에 맞는 함수가 고정이기 때문에, 런타임에 실제 객체를 따라가는 오버라이드가 일어나지 않는다.
+    - showOff()는 View 나 Button 클래스 내부에 존재하는 함수가 아니다.
+    - 실제 클래스 바깥에 선언된 헬퍼 함수에 가깝다.
+    - 코틀린이 컴파일할 때 이코드는 자바의 정적 메서드로 인식한다.
+    - 컴파일 시점에 변수의 선언 타입에 맞는 함수가 고정이기 때문에, 런타임에 실제 객체를 따라가는 오버라이드가 일어나지 않는다.
+
+### 문자열과 정규식 다루기
+
+자바에서 split() 메서드를 사용할 때, split(".")가 마침표(.)를 기준으로 문자열을 나눌 것이라 오해하기 쉽다.
+
+- 하지만 자바의 split() 메서드는 파라미터로 받은 문자열을 항상 정규식(Regex)으로 해석한다.
+- 정규식에서 마침표(.)는 '모든 문자'를 의미하는 특수 기호이므로, 의도한 대로 동작하지 않는다.
+- 그렇기 때문에 자바에서 문자 그대로 분리하기 위해서는 정규식 이스케이프 구문을 사용해야 한다. -> split("\\.")
+
+반면, 코틀린에서는 여러 split 확장 함수를 제공하여 이 점을 개선했다.
+
+- 코틀린은 정규식으로 분리하는 함수와 일반 텍스트로 분리하는 함수를 `파라미터 타입`으로 구분한다.
+  - split(String): 파라미터가 일반 `String` 이면, 문자 그대로 분리한다.
+  - split(Regex): 파라미터가 `Regex` 타입이면, 정규식으로 분리한다.
+
+- 따라서 개발자는 전달하는 값의 타입을 통해, 정규식 분리인지 일반 텍스트 분리인지 의도를 명확하게 코드에 드러낼 수 있다.
+
+```kotlin
+fun main() {
+    // NOTE: 3.5
+    val ip = "192.168.0.1"
+
+// 단순 문자열로 분리
+    val partsString = ip.split(".")
+    println("단순 문자열 분리: $partsString") // [192, 168, 0, 1]
+
+// 모든 문자로 쪼갤 경우 Regex 로 만든다.
+    val partsRegex = ip.split(Regex("\\."))
+    println("정규식으로 분리: $partsString") // [192, 168, 0, 1]
+}
+```
+
+이처럼 코틀린은 파라미터 타입을 명확히 구분함으로써, 개발자의 실수를 줄이고 코드의 가독성을 높여준다.
+
+### 코드 깔끔하게 다루기: 로컬 함수와 확장
 
 코드 깔끔하게 다듬기 위해서는 `로컬 함수`를 활용한다.
 
@@ -377,7 +413,7 @@ fun main() {
 ```kotlin
 class User(val id: Int, val name: String, val address: String) {
 
-		// 한 필드를 검증하는 로컬 함수를 정의한다.
+    // 한 필드를 검증하는 로컬 함수를 정의한다.
     fun saveUser(user: User) {
 
         fun validate(user: User,
@@ -406,25 +442,25 @@ class User(val id: Int, val name: String, val address: String) {
 ```kotlin
 
 class User(val id: Int, val name: String, val address: String) {
-		
-		fun saveUser(user: User) {
-		
-		        // saveUser 함수의 user 파라미터를 중복 사용하지 않는다.
-		        fun validate(value: String,
-		                     filedName: String) {
-		            if (value.isEmpty()) {
-		                // 바깥 함수의 파라미터에 직접 접근할 수 있다.
-		                throw IllegalArgumentException(
-		                        "Can't save user ${user.id}: " + "empty $filedName"
-		                )
-		            }
-		        }
-		
-		        // 로컬 함수를 호출해서 각 필드를 검증한다.
-		        validate(user.name, "Name")
-		        validate(user.address, "Address")
-		    }
- }
+
+    fun saveUser(user: User) {
+
+        // saveUser 함수의 user 파라미터를 중복 사용하지 않는다.
+        fun validate(value: String,
+                     filedName: String) {
+            if (value.isEmpty()) {
+                // 바깥 함수의 파라미터에 직접 접근할 수 있다.
+                throw IllegalArgumentException(
+                        "Can't save user ${user.id}: " + "empty $filedName"
+                )
+            }
+        }
+
+        // 로컬 함수를 호출해서 각 필드를 검증한다.
+        validate(user.name, "Name")
+        validate(user.address, "Address")
+    }
+}
 ```
 
 - 위의 코드에 대해 User 클래스를 확장한 함수로 검증 로직을 만들면 아래와 같다.
