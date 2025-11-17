@@ -862,7 +862,15 @@ value class Password(val value: String)
 - 인라인 클래스는 다음과 같이 제약 조건을 가진다.
     - 반드시 하나의 `val` 프로퍼티만 가져야 하며, 해당 프로퍼티는 주 생성자에서 초기화돼야 한다.
     - 인라인 클래스는 다른 클래스를 상속할 수 없고, 반대 역시 상속할 수 없다. (단, 인터페이스는 가능하다)
-    - `init` 초기화 블록을 가질 수 없다.
 - 보통 기본 타입 값의 의미를 명확하게 하고 싶을 때 인라인 클래스를 사용한다.
     - 숫자 타입의 값으로 측정한 값의 단위를 표현할 경우
     - 다른 여러 문자열의 서로 다른 의미를 구분하고 싶은 경우
+
+> 4장과 관련된 도움이 된 글 (실무)
+
+* [Kotlin 객체 생성의 안전성과 유효성 강화하기](https://cheese10yun.github.io/kotlin-pattern-2/) - companion object, value class
+
+* [Kotlin 자주 사용하는 패턴 정리](https://cheese10yun.github.io/kotlin-pattern/) - copy(), by()
+
+
+---
