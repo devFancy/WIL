@@ -1,7 +1,7 @@
 # [카프카 핵심 가이드] CHAPTER 5. 프로그램 내에서 코드로 카프카 관리하기: AdminClient를 활용한 토픽 및 컨슈머 그룹 관리
 
 
-> 이 글은 [카프카 핵심 가이드](https://product.kyobobook.co.kr/detail/S000201464167?utm_source=google&utm_medium=cpc&utm_campaign=googleSearch&gad_source=1) 책을 읽고 정리한 글입니다.
+> 이 글은 [카프카 핵심 가이드](https://product.kyobobook.co.kr/detail/S000201464167) 책을 읽고 정리한 글입니다.
 >
 > 이 글에서 다루는 모든 코드는 [깃허브](https://github.com/devFancy/springboot-coupon-system)에서 확인하실 수 있습니다.
 >

@@ -1,6 +1,6 @@
 # [카프카 핵심 가이드] CHAPTER 3. 카프카 프로듀서: 카프카에 메시지 쓰기
 
-> 이 글은 [카프카 핵심 가이드](https://product.kyobobook.co.kr/detail/S000201464167?utm_source=google&utm_medium=cpc&utm_campaign=googleSearch&gad_source=1) 책을 읽고 정리한 글입니다.
+> 이 글은 [카프카 핵심 가이드](https://product.kyobobook.co.kr/detail/S000201464167) 책을 읽고 정리한 글입니다.
 >
 > 이 글에서 다루는 모든 코드는 [깃허브](https://github.com/devFancy/springboot-coupon-system)에서 확인하실 수 있습니다.
 >
