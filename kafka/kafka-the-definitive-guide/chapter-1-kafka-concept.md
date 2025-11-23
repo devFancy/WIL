@@ -18,19 +18,19 @@
 하지만 비즈니스가 성장하고 시스템이 복잡해지면서, 데이터를 생산하는 프로듀서와 데이터를 필요로 하는 컨슈머의 수가 계속 늘어난다.
 이때마다 시스템 간의 직접 연결(Point-to-Point)을 추가하면, 아래 그림과 같이 전체 아키텍처는 거미줄처럼 얽혀 추적하고 관리하기가 매우 어려워진다.
 
-![](/book/img/kafka/Kafka-Why-and-Concept-1.png)
+![](/img/kafka/Kafka-Why-and-Concept-1.png)
 
 이러한 복잡성을 해결하기 위해 **발행/구독(Publish/Subscribe) 모델**을 사용한다.
 모든 프로듀서는 데이터를 중앙 시스템으로 보내고, 모든 컨슈머는 이 중앙 시스템으로부터 데이터를 가져간다.
 이 중앙 시스템이 바로 메시지 큐 또는 카프카와 같은 브로커다.
 이를 통해 아래 그림처럼 프로듀서와 컨슈머 간의 직접적인 의존성이 제거되어 **결합도가 낮아진다.**
 
-![](/book/img/kafka/Kafka-Why-and-Concept-2.png)
+![](/img/kafka/Kafka-Why-and-Concept-2.png)
 
 그러나 여기서 또 다른 문제가 발생할 수 있다. 모니터링 지표, 서버 로그, 사용자 클릭 정보 등 **데이터의 종류**에 따라 각각 별개의 메시징 시스템을 구축하는 것이다.
 이는 결국 아래 그림과 같이 여러 개의 시스템을 **중복**으로 관리해야 하는 비효율을 초래한다.
 
-![](/book/img/kafka/Kafka-Why-and-Concept-3.png)
+![](/img/kafka/Kafka-Why-and-Concept-3.png)
 
 카프카는 바로 이 문제를 해결하기 위해 등장했다.
 
@@ -78,7 +78,7 @@
 
 * 파티션을 통해 데이터를 분산 저장하여 확장성과 가용성을 높인다.  (아래 그림 참고)
 
-![](/book/img/kafka/Kafka-Why-and-Concept-4.png)
+![](/img/kafka/Kafka-Why-and-Concept-4.png)
 
 ### 프로듀서 (Producer)와 컨슈머 (Consumer)
 
@@ -98,7 +98,7 @@
 
 * 이러한 구조 덕분에 하나의 토픽 데이터를 가지고, 한쪽에서는 실시간 분석(그룹 A)을, 다른 한쪽에서는 데이터베이스 저장(그룹 B)을 하는 등 다양한 목적의 애플리케이션을 동시에 운영할 수 있다.
 
-![](/book/img/kafka/Kafka-Why-and-Concept-5.png)
+![](/img/kafka/Kafka-Why-and-Concept-5.png)
 
 ### 브로커 (Broker)와 클러스터 (Cluster)
 
@@ -110,7 +110,7 @@
 
 * 아래 그림은 카프카의 고가용성과 내구성을 보장하는 핵심 기능인 **복제(Replication) 동작 방식**을 보여준다.
 
-![](/book/img/kafka/Kafka-Why-and-Concept-6.png)
+![](/img/kafka/Kafka-Why-and-Concept-6.png)
 
 * 각 파티션은 여러 브로커에 복제본을 가질 수 있는데, 이 중 단 하나만 `리더`(Leader) 역할을 하고 나머지는 `팔로워`(Follower) 가 된다. **모든 데이터의 읽고 쓰는 작업은 `리더`를 통해서만** 처리되는 것이 원칙이다.
 

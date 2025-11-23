@@ -38,7 +38,7 @@
 
 프로듀서는 단순히 메시지를 보내는 것처럼 보이지만, 내부적으로는 아래 그림과 같이 여러 단계를 거쳐 동작한다.
 
-![](/book/img/kafka/Kafka-Producer-3-1.png)
+![](/img/kafka/Kafka-Producer-3-1.png)
 
 * [1] ProducerRecord 생성:
 
@@ -332,7 +332,7 @@ public class CouponIssueProducer {
 
 ### 3. 타임아웃 및 전송 시간 관련 설정
 
-![](/book/img/kafka/Kafka-Producer-3-2.png)
+![](/img/kafka/Kafka-Producer-3-2.png)
 
 위 그림은 `send()` 호출부터 최종 응답까지의 과정을 보여준다. 이 과정에서 중요한 타임아웃 설정은 다음과 같다.
 
@@ -486,7 +486,7 @@ class KafkaProducerConfigTest {
 }
 ```
 
-![](/book/img/kafka/Kafka-Producer-Test-1.png)
+![](/img/kafka/Kafka-Producer-Test-1.png)
 
 놀랍게도 이 테스트는 성공한다. 여기서 '멱등성이 켜지면 `retries`가 `Integer.MAX_VALUE`로 강제된다고 했는데 왜 테스트는 통과하지?' 라는 의문이 생긴다.
 
@@ -530,7 +530,7 @@ class KafkaProducerConfigTest {
 }
 ```
 
-![](/book/img/kafka/Kafka-Producer-Test-2.png)
+![](/img/kafka/Kafka-Producer-Test-2.png)
 
 위의 테스트 실행 결과를 보면, `RETRIES_CONFIG` 키가 존재하지 않아 `configs` 맵의 전체 크기가 **10개**로 확인된다.
 

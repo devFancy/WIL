@@ -102,7 +102,7 @@ API에 처리율 제한 장치를 두면 좋은 점은 아래와 같다.
 
 지금까지 정리한 내용을 토대호 상세한 설계 도면을 작성해보면 아래 그림과 같이 표현할 수 있다.
 
-![](../img/system-design-interview/system-design-interview-4-1.png)
+![](../../img/system-design-interview/system-design-interview-4-1.png)
 (그림 4.1 처리율 제한에 대한 아키텍처)
 
 - 처리율 제한 규칙은 디스크에 보관하고 작업 프로세스는 수시로 규칙을 읽어서 캐시에 저장한다.
@@ -138,7 +138,7 @@ API에 처리율 제한 장치를 두면 좋은 점은 아래와 같다.
     - 하지만, 이 방법은 규모면에서 확장성과 유연성이 떨어지기 때문에 추천하지 않는다.
 - 더 나은 해결책으로 레디스와 같은 중앙 집중형 저장소를 쓰는 것이다. 아래 그림 4.2처럼 말이다.
 
-![](../img/system-design-interview/system-design-interview-4-2.png)
+![](../../img/system-design-interview/system-design-interview-4-2.png)
 (그림 4.2 중앙 집중형 데이터 저장소 - Redis)
 
 #### 성능 최적화

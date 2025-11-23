@@ -39,14 +39,14 @@
 
 * 컨슈머 1개: 토픽의 모든 파티션에서 데이터를 혼자 처리한다. (아래 그림 4-1)
 
-![](/book/img/kafka/Kafka-Consumer-1.png)
+![](/img/kafka/Kafka-Consumer-1.png)
 
 * **컨슈머 추가**: 같은 그룹 내에 컨슈머를 추가하면, 카프카는 자동으로 파티션을 재분배(리밸런싱)하여 작업을 나눈다.
   특히 데이터베이스 쓰기와 같이 지연시간이 긴 작업을 수행할 때, 이런 방식으로 파티션과 메시지 처리를 분산시키는 것이 가장 일반적인 규모 확장 방식이다.
 
     * 컨슈머가 4개이면 각각 1개의 파티션을 담당하게 되어 처리량이 늘어난다. (아래 그림 4-3)
 
-  ![](/book/img/kafka/Kafka-Consumer-2.png)
+  ![](/img/kafka/Kafka-Consumer-2.png)
 
     * 토픽의 파티션 개수를 선정하는 방법은 이전 글인 [[카프카 핵심 가이드] CHAPTER 2. 카프카 설치하기](https://devfancy.github.io/Kafka-Installation-Sizing-Guide/)의 "토픽의 파티션 수 결정 방법" 부분을 참고한다.
 
@@ -58,7 +58,7 @@
 
 * 만약 파티션이 4개인데, 컨슈머를 5개 투입하면, 1개의 컨슈머는 아무 파티션도 할당받지 못하고 유휴 상태(Idle)가 된다. (아래 그림 4-4)
 
-![](/book/img/kafka/Kafka-Consumer-3.png)
+![](/img/kafka/Kafka-Consumer-3.png)
 
 * **TIP**: 토픽을 처음 설계할 때 예상되는 **최대 처리량**을 고려하여 파티션 수를 설정하는 것이 좋다.
 
@@ -85,7 +85,7 @@
 
 아래 그림 4-6과 같이 두 단계에 걸쳐 일어나게 된다.
 
-![](/book/img/kafka/Kafka-Consumer-4.png)
+![](/img/kafka/Kafka-Consumer-4.png)
 
 1. 모든 컨슈머가 자신에게 할당된 파티션을 포기(해제)하고,
 
@@ -110,7 +110,7 @@
 
 아래 그림 4-7은 어떻게 컨슈머와 파티션의 일부만을 재할당함으로써 점진적으로 리밸런싱이 수행되는지 보여준다.
 
-![](/book/img/kafka/Kafka-Consumer-5.png)
+![](/img/kafka/Kafka-Consumer-5.png)
 
 
 ### 리밸런스는 어떻게 감지되는가?
