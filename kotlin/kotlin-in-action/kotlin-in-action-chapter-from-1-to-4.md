@@ -1,4 +1,4 @@
-# Kotlin in Action 2/E
+# Kotlin in Action 2/E, 1-4장
 
 > 이 글은 [Kotlin IN Action 2/E](https://product.kyobobook.co.kr/detail/S000215768644) 책을 읽고 정리한 내용입니다.
 
@@ -7,6 +7,19 @@
 * 자바 경험이 있는 개발자
 
 * 서버 개발자 or 안드로이드 개발자와 같이 JVM에서 실행될 프로젝트를 구축하는 모든 개발자
+
+> 3장과 관련해서 도움이 된 글
+
+* [[카카오페이] 기술 블로그 - 코틀린, 저는 이렇게 쓰고 있습니다. (확장 함수)](https://tech.kakaopay.com/post/katfun-joy-kotlin/#확장-함수를-사용한-유틸리티-라이브러리-만들기)
+
+* [Java 개발자가 보면 좋을 Kotlin 팁 모음 - 확장 함수](https://hyeon9mak.github.io/kotlin-tips-for-java-developer/#-확장함수)
+
+> 4장과 관련해서 도움된 글
+
+* [Kotlin 객체 생성의 안전성과 유효성 강화하기](https://cheese10yun.github.io/kotlin-pattern-2/) - companion object, value class
+
+* [Kotlin 자주 사용하는 패턴 정리](https://cheese10yun.github.io/kotlin-pattern/) - copy(), by()
+
 
 ---
 
@@ -55,6 +68,15 @@
 * 코틀린은 상호운용성이 좋다.
 
     * 기존 자바 라이브러리를 최대한 활용한다. -> 대부분 자바 표준 라이브러리 클래스에 의존하며 코틀린에서 컬렉션을 더 쉽게 활용할 수 있게 해주는 함수를 몇 가지 더 확장할 뿐이다.
+
+## 알게된 점, 배운 점
+
+* 코틀린의 철학 중 간결하다, 안전하다는 것은 많이 들어봤다. 실제로 Java -> Kotlin 전환할 때 이러한 장점을 느낄 수 있었다.
+
+* enum 과 when을 활용할 때 코드가 직관적인 부분이 인상깊었습니다.
+
+* 코틀린은 **언체크 예외**로 이루어져있다는 점. → 모든 예외 처리는 **100% 개발자의 선택 사항**이다.  → 코드가 지저분하지 않는다.
+
 
 ---
 
@@ -489,6 +511,18 @@ class User(val id: Int, val name: String, val address: String) {
 - `User.validateBeforeSave()` 와 같이 확장 함수를 로컬 함수로도 정의할 수 있다.
 - 하지만 내포된 함수의 깊이가 깊어지면 코드를 읽기가 어려워지기 때문에, 일반적으로 한 단계만 함수를 내포하는 것을 권장한다.
 
+## 배운 점
+
+- 코틀린에서는 최상위 프로퍼티를 클래스 밖에서 선언 가능하다. (const 키워드)
+
+- 확장 함수, 확장 프로퍼티 에 대한 개념
+  - 확장 함수는 오버라이딩이 불가능하다 -> 클래스의 멤버가 아니기 때문!
+
+- 로컬 함수를 통한 코드 중복 줄이기
+  - 가독성을 위해 함수에 대한 depth는 한 단계만 선언하자.
+
+---
+
 ## 4장. 클래스, 객체, 인터페이스
 
 ### 클래스 계층 정의
@@ -686,7 +720,8 @@ class TwitterUser(nickname: String) : User(nickname)
 **부 생성자**: 상위 클래스를 다른 방식으로 초기화
 
 - 부 생성자는 constructor 키워드로 시작하고 필요에 따라 얼마든지 부 생성자를 선언할 수 있다.
-- 아래와 같이 `super()` 키워드를 통해 자신에 대응하는 상위 생성자를 호출할 수 있다. 이를 통해 각 생성자가 위임한 상위 클래스 생성자를 보여준다.
+- 아래와 같이 `super()` 키워드를 통해 자신에 대응하는 상위 생성자를 호출할 수 있다. 
+- 이를 통해 각 생성자가 위임한 상위 클래스 생성자를 보여준다.
 
 ```kotlin
 open class Downloader {
@@ -737,15 +772,16 @@ class MytDownloader : Downloader {
 
 **data 클래스**
 
-- data 변경자를 클래스 앞에 붙이면 필요한 메서드(toString, equals, hashCode)를 컴파일러가 자동으로 만들어준다. 이렇게 data 변경자가 붙은 클래스를 데이터 클래스라고 부른다.
+- data 변경자를 클래스 앞에 붙이면 필요한 메서드(toString, equals, hashCode)를 컴파일러가 자동으로 만들어준다. 
+  - 이렇게 data 변경자가 붙은 클래스를 데이터 클래스라고 부른다.
 - 데이터 클래스의 프로퍼티가 꼭 val일 필요는 없지만, 읽기 전용으로 만들어 불변 클래스로 만드는 것을 권장한다.
 - 코틀린 컴파일러는 불변 객체로 쉽게 활용할 수 있도록 copy 메서드를 제공해준다.
     - 객체 메모리에서 직접 바꾸는 대신 복사본을 만든다.
 
 **코틀린 data 클래스와 자바 record 비교**
 
-- Java 14 에 `record`가 처음 도입되었고, 개념적으로 record는 여러 불변 값으로 이뤄진 그룹을 다룬다는 점에서 Kotlin의 data 클래스와 비슷하다. 다만 record에는 copy와 같은 다른
-  편의 메서드는 없다.
+- Java 14 에 `record`가 처음 도입되었고, 개념적으로 record는 여러 불변 값으로 이뤄진 그룹을 다룬다는 점에서 Kotlin의 data 클래스와 비슷하다. 
+  - 다만 record에는 copy와 같은 다른 편의 메서드는 없다.
 - Java의 record 에는 더 많은 구조적 제약이 있다.
     - 모든 프로퍼티가 private이며, final 이어야 한다.
     - record는 상위 클래스를 확장할 수 없다.
@@ -764,8 +800,8 @@ fun main() {
 
     // Manager는 Cook의 기능을 직접 구현하지 않았지만,
     // by 키워드를 통해 위임받아 호출할 수 있다.
-    println(manager.makePizza()) // 페퍼로니 피자
-    println(manager.makePasta()) // 크림 파스타
+    println(manager.makePizza()) // 페퍼로니 피자 -> ExpertChef 클래스가 위임받아 처리한다. -> return this.chef.makePizza() 실행
+    println(manager.makePasta()) // 크림 파스타 -> ExpertChef 클래스가 위임받아 처리한다. -> return this.chef.makePasta() 실행
 
     // Manager 고유의 기능도 호출 가능하다.
     manager.manageStaff()  // 직원들을 관리합니다.
@@ -781,11 +817,11 @@ class ExpertChef : Cook {
     override fun makePasta() = "크림 파스타"
 }
 
-// 위임 클래스 - Delegator 패턴!
+// 위임 클래스 - Delegator(위임) 패턴!
 // 'Cook'의 역할은 수행해야 하지만, 실제 구현은 'chef'에게 맡긴다(by chef).
 class Manager(val chef: ExpertChef) : Cook by chef {
 
-    // makePizza(), makePasta()는 chef에게 자동 위임된다.
+    // makePizza(), makePasta()는 chef, 즉 ExpertChef 에게 자동 위임된다.
     // 코드를 작성할 필요가 없습니다.
 
     fun manageStaff() {
@@ -812,9 +848,10 @@ class Manager(val chef: ExpertChef) : Cook by chef {
     - (비교) 자바에서 보통 클래스의 생성자를 private로 제한하고 정적인 필드에 그 클래스의 유일한 객체를 저장하는 싱글턴 패턴을 통해 구현한다.
     - 객체 선언 특성상 생성자를 쓸 수 없다.
 - 참고: 싱글턴과 의존관계 주입
-    - 소규모 소프트웨어에서는 싱글턴이나 객체 선언이 유용하지만 대규모 소프트웨어에서는 적합하지 않다. 그 이유는 객체 생성을 제어할 방법이 없고 생상자 파라미터를 지정할 수 없기 때문이다.
+    - 소규모 소프트웨어에서는 싱글턴이나 객체 선언이 유용하지만 대규모 소프트웨어에서는 적합하지 않다. 
+    - 그 이유는 객체 생성을 제어할 방법이 없고 생상자 파라미터를 지정할 수 없기 때문이다.
 
-**2. 동반 객체 → companion object**
+**2. 동반 객체 -> companion object**
 
 - 어떤 클래스와 관련 있는 메서드와 팩토리 메서드를 담을 때 사용한다.
 - 자바의 static 처럼 클래스의 인스턴스가 아니라, 클래스 자체에 소속된 멤버(변수, 메서드)를 만들고 싶을 때 사용한다.
@@ -824,10 +861,10 @@ class Manager(val chef: ExpertChef) : Cook by chef {
 
     ```kotlin
     fun main() {
-        MyClass.callMe() //Companion object called!
+        MyClass.callMe() // Success -> Companion object called!
     
         val myObject = MyClass()
-    //    myObject.callMe() // Error: Unresolved reference: callMe
+    //    myObject.callMe() // Error -> Unresolved reference: callMe
     }
     
     class MyClass {
@@ -851,8 +888,8 @@ class Manager(val chef: ExpertChef) : Cook by chef {
 
 - 인라인 클래스를 사용하면 성능을 희생하지 않고 타입 안정성을 얻을 수 있다.
 - 인라인 클래스로 만들기 위해서는 클래스 앞에 `value` 키워드를 사용하고 `@JvmInline` 어노테이션을 붙여야 한다.
-    - 이렇게 하면 실행 시점에 해당 클래스의 인스턴스는 감싸진 프로퍼티로 대체된다. 즉, 클래스의 데이터가 사용되는 시점에 인라인된다. → 정확히 말하면 항상 인라인 되는 것은 아니고, 때로는 래퍼 객체가
-      생성되어 박싱된다.
+    - 이렇게 하면 실행 시점에 해당 클래스의 인스턴스는 감싸진 프로퍼티로 대체된다. 즉, 클래스의 데이터가 사용되는 시점에 인라인된다. 
+    - → 정확히 말하면 항상 인라인 되는 것은 아니고, 때로는 래퍼 객체가 생성되어 박싱된다.
 
 ```kotlin
 @JvmInline
@@ -866,11 +903,16 @@ value class Password(val value: String)
     - 숫자 타입의 값으로 측정한 값의 단위를 표현할 경우
     - 다른 여러 문자열의 서로 다른 의미를 구분하고 싶은 경우
 
-> 4장과 관련된 도움이 된 글 (실무)
+## 배운 점
 
-* [Kotlin 객체 생성의 안전성과 유효성 강화하기](https://cheese10yun.github.io/kotlin-pattern-2/) - companion object, value class
+- `sealed` 클래스는 확장이 제한된 클래스 계층을 정의할 때 사용한다.
+- 코틀린 data 클래스와 자바 record 차이점
+- 객체 생성 시 안정성 강화하고 싶을 때는 동반 객체를 사용하자.
+- 값 타임을 관리할 경우 인라인 클래스를 활용하자.
+  - 이메일 같은 값 타임 -> 별도 관리를 위해 value calss를 활용한다.
+  - value calss를 사용함으로써 이점은 명확하게 타입을 정의할 수 있고, 유효성 검사를 통합할 수 있다.
+  - 단, value class로 감싼 타입은 JPA나 MongoDB와 같은 DB 접근 라이브러리를 사용할 때 자동으로 매핑되지 않는다. -> 적절한 컨퍼터를 정의해줘야 한다.
+- copy 메서드는 원본 객체의 일부 속성을 변경해서 새로운 객체를 생성해준다.
+  - 기존 객체의 불변성을 유지하면서 필요한 데이터만 갱신할 수 있는 효율적인 방법을 제공한다.
+- 코틀린에서 by 키워드를 활용해서 로깅을 설정할 수 있다. -> [관련 글](https://cheese10yun.github.io/kotlin-pattern/#koteulrineseo-by-kiweodeureul-hwalyonghan-roging-seoljeong)
 
-* [Kotlin 자주 사용하는 패턴 정리](https://cheese10yun.github.io/kotlin-pattern/) - copy(), by()
-
-
----
