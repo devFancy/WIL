@@ -1,6 +1,6 @@
 # Kotlin in Action 2/E, 5-8장
 
-> 이 글은 [Kotlin IN Action 2/E](https://product.kyobobook.co.kr/detail/S000215768644) 책을 읽고 정리한 내용입니다.
+> 이 글은 [Kotlin IN Action 2/E](https://product.kyobobook.co.kr/detail/S000215768644) 책을 읽고 개인 생각과 학습 테스트를 포함하여 정리한 내용입니다.
 
 대상 독자
 
@@ -388,3 +388,240 @@ fun main() {
 
 ---
 
+# 6장. 컬렉션과 시퀀스
+
+이 장에서는 코틀린 표준 라이브러리에서 컬렉션을 다룰 때 필수적으로 사용되는 함수형 API들을 다룬다.
+
+그리고 컬렉션과 시퀀스의 차이점을 알아보고자 한다.
+
+## 6.1 컬렉션에 대한 함수형 API
+
+주의할 점은 이 함수들은 연쇄 호출 시 단계마다 **새로운 컬렉션(List, Set 등)을 생성**한다는 것이다.
+
+### 원소 제거와 반환
+
+원소 제거와 반환을 위해 `filter`와 `map`을 활용한다.
+- `filter`: 조건(술어)을 만족하는 원소만 남긴다. -> 여기서 조건(술어)는 중괄호 `{...}` 안의 내용을 의미한다.
+- `map`: 원소를 변환하여 새로운 값으로 구성된 컬렉션을 만든다.
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4)
+// 짝수만 남기고(filter), 제곱으로 변환(map)
+// filter에서 [2, 4] 리스트 생성 -> map에서 [4, 16] 리스트 생성
+val result = numbers.filter { it % 2 == 0 }.map { it * it }
+println(result) // [4, 16]
+```
+
+### 데이터 누적과 집계
+
+또한, 데이터 누적과 집계를 위해 `reduce`와 `fold` 함수를 사용한다. -> 컬렉션의 모든 원소를 바탕으로 하나의 결과값을 만들어낼 때 사용한다.
+- `reduce`: 첫 번째 원소를 초기값으로 사용하며, 그 이후 원소들을 차례로 연산에 적용합니다. (빈 컬렉션일 경우 예외 발생 가능)
+- `fold`: reduce와 달리, 임의의 초기값을 지정할 수 있고, 해당 초기값부터 시작하여 연산을 누적한다. (빈 컬렉션이어도 안전함, 반환 타입 변경 가능)
+
+```kotlin
+val list = listOf(1, 2, 3)
+
+// reduce: 1 + 2 -> 3 + 3 -> 6
+val sumReduce = list.reduce { acc, i -> acc + i }
+
+// fold: 초기값 10 + 1 -> 11 + 2 -> 13 + 3 -> 16
+val sumFold = list.fold(10) { acc, i -> acc + i }
+```
+
+### 조건 검사와 검색
+
+컬렉션에 대해 자주 수행하는 연산으로, 컬렉션의 데이터 상태를 확인하거나 특정 데이터를 찾을 때 사용한다.
+- `all`: 모든 원소가 조건을 만족하면 true를 반환한다.
+- `any`: 하나라도 조건을 만족하면 true를 반환한다.
+- `none`: 조건을 만족하는 원소가 하나도 없으면 true를 반환한다.
+- `count`: 조건을 만족하는 원소의 개수를 반환한다.
+- `find`: 조건을 만족하는 첫 번째 원소를 반환한다. (없으면 null 반환)
+
+```kotlin
+val ages = listOf(25, 14, 30, 20)
+val canEnterBar = { age: Int -> age >= 20 }
+
+println(ages.all(canEnterBar))  // false (14세 존재)
+println(ages.any(canEnterBar))  // true
+println(ages.count(canEnterBar)) // 3
+println(ages.find(canEnterBar))  // 25 (가장 먼저 발견된 값)
+```
+
+### 리스트 분리
+
+조건에 따라 컬렉션을 두 개의 그룹(만족 O, 만족 X)으로 나눌 때, `partition` 함수를 사용한다.
+- 이때, 반환 타입이 `Pair<List, List>`이므로 구조 분해 선언을 통해 변수에 할당할 수 있다.
+
+```kotlin
+val nums = listOf(1, 2, 3, 4)
+
+// 짝수 리스트(evens)와 홀수 리스트(odds)로 분리
+val (evens, odds) = nums.partition { it % 2 == 0 }
+
+println(evens) // [2, 4]
+println(odds)  // [1, 3]
+```
+
+### 그룹화
+
+특정한 기준(Key)에 따라 원소들을 분류하여 `Map<Key, List<Value>>` 형태로 반환할 때 `groupBy`를 사용한다.
+- String의 확장 함수인 `first` 등을 멤버 참조(Member Reference) 문법(`::`)으로 전달하여 작성할 수 있다.
+
+```kotlin
+val words = listOf("apple", "banana", "apricot", "blueberry", "cherry")
+
+// 첫 글자(it.first())를 기준으로 그룹화
+// 멤버 참조 사용: words.groupBy(String::first) 와 동일
+val byFirstLetter = words.groupBy { it.first() }
+
+println(byFirstLetter)
+// 출력: {a=[apple, apricot], b=[banana, blueberry], c=[cherry]}
+```
+
+### 컬렉션을 맵으로 변환
+
+원소를 그룹핑하는 것이 아니라, 각 원소에서 키와 값을 추출해 Map<Key, Value> 형태로 만들고 싶을 때 `associate` 함수를 사용한다.
+- 여기서 주의해야할 점은 키(Key)가 중복될 경우, `groupBy`와 달리 **마지막에 처리된 원소가 이전 값을 덮어쓰게 된다.**
+
+```kotlin
+// 람다 안에서 Key to Value 쌍을 반환해야하는 경우
+
+val people = listOf("Alice", "Bob", "Charlie")
+
+// 이름 -> 이름의 길이 형태의 맵을 생성
+// { it to it.length } 부분이 키와 값을 정의합니다.
+val nameToLength = people.associate { it to it.length }
+
+println(nameToLength)
+// 출력: {Alice=5, Bob=3, Charlie=7}
+```
+
+### 가변 컬렉션 원소 변경
+
+`replaceAll`, `fill` 함수는 `MutableList`(수정 가능한 리스트)에서만 사용할 수 있으며, 
+새로운 리스트를 만드는 것이 아니라 기존 리스트의 내용을 직접 수정한다.
+
+- `replaceAll`: 각 원소를 람다의 결과로 대체한다. -> map과 비슷하지만, 새 리스트를 만들지 않고 원본을 바꾼다.
+- `fill`: 리스트의 모든 원소를 특정 값 하나로 덮어쓴다.
+
+```kotlin
+val items = mutableListOf("Apple", "Banana", "Cherry")
+
+// 1. replaceAll: 규칙에 따라 내용을 바꿈
+// 모든 원소를 대문자로 변경
+items.replaceAll { it.uppercase() }
+println(items) // [APPLE, BANANA, CHERRY]
+
+// 2. fill: 모든 원소를 동일한 값으로 채움
+// 리스트 내용을 전부 "Empty"로 초기화
+items.fill("Empty")
+println(items) // [Empty, Empty, Empty]
+```
+
+### 빈 값 처리 (ifEmpty vs ifBlank)
+
+이 두 함수는 값이 없을 때 사용할 기본값을 지정하는 함수이다.
+
+주로 문자열(String) 처리에 쓰이지만, `ifEmpty`는 컬렉션에도 쓸 수 있다.
+
+가장 큰 차이점은 "**공백을 어떻게 취급하느냐**" 이다.
+
+- `ifEmpty`: 길이가 0이어야만 동작한다.
+- `ifBlank`: 길이가 0이거나, 공백 문자(스페이스, 탭, 줄바꿈 등)만 있을 때도 동작한다.
+
+만약 "   "(공백이 3칸)의 경우
+- `ifEmpty`는 "글자가 3개 있다"고 판단하여 동작을 안하고,
+- `ifBlank`는 "의미 있는 내용이 없다"고 판단하여 동작한다.
+
+```kotlin
+val emptyStr = ""       // 진짜 빈 문자열
+val blankStr = "   "    // 공백만 있는 문자열
+
+// 1. ifEmpty 예시
+println(emptyStr.ifEmpty { "기본값" }) // "기본값" (길이가 0이라서)
+println(blankStr.ifEmpty { "기본값" }) // "   "   (길이가 3이라서 그대로 나옴)
+
+// 2. ifBlank 예시 - 유효성 검사 기준에서 더 엄격하다.
+println(emptyStr.ifBlank { "기본값" }) // "기본값"
+println(blankStr.ifBlank { "기본값" }) // "기본값" (공백만 있어서 비어있다고 간주)
+```
+
+- 사용자 입력(ID, 닉네임 등)을 검증할 때 `ifBlank`를 사용하는 것을 권장한다.
+- 단순히 리스트나 맵이 비어있는지 확인할 때는 `ifEmpty`를 사용한다.
+
+## 6.2 시퀀스 - 게으르게 계산한다.
+
+핵심: 시퀀스는 `데이터가 많거나 연산 단계가 많을 때` 성능을 최적화하기 위해 사용한다.
+
+시퀀스는 중간 임시 컬렉션을 사용하지 않고 컬렉션 연산을 연쇄하는 방법을 제공한다.
+- 일반 컬렉션 함수(map, filter 등)는 단계마다 중간 결과물(임시 컬렉션)을 생성한다. -> 이는 데이터가 수백만 개라면 메모리 낭비가 심해진다.
+- 반면, 시퀀스는 중간 결과를 저장하지 않고, 연산을 정의해 두었다가 최종 결과가 필요할 때(최종 연산 시) 한꺼번에 계산한다.
+
+
+### 시퀀스 연산 - 중간, 최종
+
+중간 연산
+- map, filter 처럼 또 다른 시퀀스를 반환한다.
+- 이 단계에서는 아무런 계산도 수행하지않고, 어떻게 계산할지만 초점을 둔다.
+
+최종 연산
+- toList, count, first 처럼 결과를 반환한다.
+- 이 함수가 호출되는 순간, 미뤄뒀던 모든 계산이 수행된다.
+
+컬렉션과 시퀀스는 데이터를 처리하는 방향이 다르다.
+- 컬렉션은 모든 원소에 대해 1단계(map)를 끝내고, 그 결과물 전체에 대해 2단계(filter)를 수행한다.
+- 시퀀스는 첫 번째 원소가 1단계 -> 2단계를 거쳐 결과가 되고, 그 다음 두 번째 원소가 1단계 -> 2단계를 거친다.
+
+=> 무슨 차이일까?
+- map을 하고 find로 첫 번째 값만 찾을 때, 
+- 컬렉션은 모든 원소를 map 하지만, 시퀀스는 조건을 만족하는 원소를 찾으면 뒤에 있는 원소들은 쳐다보지도 않고 연산을 끝낸다.
+
+
+```kotlin
+val list = listOf(1, 2, 3, 4)
+
+// 1. 일반 컬렉션 (Eager)
+// [1, 2, 3, 4] -> map 전체 수행 -> [1, 4, 9, 16] (임시 리스트 생성)
+// -> find 수행 -> 4보다 큰 첫 값 9 반환
+val resultList = list.map { it * it }.find { it > 3 }
+
+// 2. 시퀀스 (Lazy)
+// 1 -> map(1*1=1) -> find(1>3? X)
+// 2 -> map(2*2=4) -> find(4>3? O) -> 4 반환! (끝)
+// * 3, 4는 계산조차 안 함 (효율적)
+val resultSeq = list.asSequence()
+    .map { it * it }
+    .find { it > 3 }
+```
+
+컬렉션과 달리, 시퀀스는 모든 연산은 각 원소에 대해 순차적으로 적용된다는 점이다.
+- 즉, 첫 번째 원소가 처리되고, 다시 두 번째 원소가 처리되듯이 -> 모든 원소에 대해 적용된다.
+
+
+### 시퀀스 만들기
+
+컬렉션에서 변환하기(asSequence): 이미 있는 리스트나 세트를 시퀀스로 바꿀 때 사용한다.
+
+```kotlin
+val list = listOf(1, 2, 3)
+val sequence = list.asSequence() // 시퀀스로 변환
+```
+
+직접 생성하기 (generateSequence): 이전 원소를 바탕으로 다음 원소를 계산하여 시퀀스를 만든다. `무한 시퀀스`를 만들 때 자주 사용된다.
+
+```kotlin
+// 0부터 시작해서 1씩 증가하는 시퀀스
+val naturalNumbers = generateSequence(0) { it + 1 }
+
+// 100까지만 가져와서 합계 구하기 (takeWhile이 없으면 무한 루프)
+val sum = naturalNumbers.takeWhile { it <= 100 }.sum()
+println(sum) // 0부터 100까지의 합
+```
+
+## 배운 점
+
+- 컬렉션 연산의 비용과 시퀀스의 효율성에 대해 알게됐다.
+  - 중간 결과를 저장하지 않고 원소별로 순차 처리(세로 방향)하므로 대용량 데이터 처리나 연쇄 연산 시에는 시퀀스를 사용하자!
+- 집계 -> reduce는 빈 컬렉션에서 예외가 발생할 수 있으므로, 초기값을 지정할 수 있고 안전한 fold 함수를 사용하는 것이 좋다.
+- 유효성 검사 -> 안전을 위해 ifBlank 함수를 사용하자.
+- 변환 -> 키 중복 시 덮어쓰기가 발생하는 associate와 리스트로 묶어주는 groupBy의 차이를 명확히 구분해서 사용해야 한다.
