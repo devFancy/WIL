@@ -270,11 +270,11 @@ class CircuitAnnotationController() {
 - 같은 클래스의 내부 메서드 호출 불가능
     - Spring AOP는 프록시 패턴으로 동작하므로, 같은 클래스 내부의 메서드를 호출(this.method)할 때는 서킷 브레이커가 동작하지 않습니다.
 
-### 해결 방안: 함수형 스타일로 개선하기
+## 해결 방안: 함수형 스타일로 개선하기
 
 위의 문제들을 해결하기 위해, Kotlin의 함수형 프로그래밍 스타일을 도입하여 구조를 개선해보겠습니다.
 
-#### 핵심 인터페이스 및 구현체
+### 핵심 인터페이스 및 구현체
 
 > CircuitBreaker.kt
 
@@ -370,7 +370,7 @@ public value class Result<out T> @PublishedApi internal constructor(
 - 컴파일러가 가능한 경우 래퍼 객체를 생성하지 않고 내부의 값을 직접 사용하도록 최적화합니다.
 - 덕분에 서킷 브레이커처럼 빈번하게 호출되는 로직에서도 GC 부담을 줄이고 높은 성능을 유지할 수 있습니다.
 
-#### 유틸리티 확장 함수로 정의하기
+### 유틸리티 확장 함수로 정의하기
 
 이제 Result 타입을 더욱 유용하게 다루기 위한 확장 함수를 정의합니다.
 
@@ -407,7 +407,7 @@ class CircuitOpenException(message: String = "Circuit breaker is open") : Runtim
 
 - CircuitOpenException: 라이브러리 종속적인 예외(CallNotPermittedException)를 대신할 커스텀 예외입니다.
 
-#### 개선된 Controller
+### 개선된 Controller
 
 최종적으로 아래와 같이 Controller 클래스를 개선할 수 있습니다.
 
@@ -447,7 +447,7 @@ class CircuitUtilController(
     - 함수의 마지막 매개변수가 람다인 경우, 해당 람다식을 소괄호 바깥으로 뺄 수 있습니다.
     - 즉, circuitBreaker.run("name", { ... }) 라고 써야 할 것을, 후행 람다 덕분에 더 직관적으로 표현한 것입니다.
 
-### 테스트로 검증해보기
+## 테스트로 검증해보기
 
 마지막으로, 제가 만든 구조가 의도대로 동작하는지 검증해보겠습니다.
 
