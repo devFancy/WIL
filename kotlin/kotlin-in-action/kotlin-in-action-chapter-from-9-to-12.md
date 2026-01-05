@@ -16,7 +16,9 @@
     - [컬렉션과 범위 관련 관례](#컬렉션과-범위-관련-관례)
     - [구조 분해 선언](#구조-분해-선언-destructuring-declaration)
 - [10장. 고차 함수](#10장-고차-함수)
-
+    - [고차 함수 개념 및 만드는 방법](#고차-함수-개념-및-만드는-방법)
+    - [고차 함수의 성능 개선: Inline 함수](#고차-함수의-성능-개선-inline-함수)
+    - [람다 안에서의 흐름 제어 (return)](#람다-안에서의-흐름-제어-return)
 ---
 
 # 9장. 연산자 오버로딩과 다른 관례
@@ -76,12 +78,12 @@
 fun main() {
     // 1. rangeTo (..): 닫힌 범위 (10 포함)
     val closedRange = 1..10
-    println("Closed: " + closedRange.joinToString()) 
+    println("Closed: " + closedRange.joinToString())
     // result: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 
     // 2. rangeUntil (..<): 열린 범위 (10 미포함)
     val openRange = 1..<10
-    println("Open: " + openRange.joinToString()) 
+    println("Open: " + openRange.joinToString())
     // result: 1, 2, 3, 4, 5, 6, 7, 8, 9
 }
 ```
@@ -95,7 +97,8 @@ fun main() {
 val features = listOf("Operator", "Convention", "Destructuring")
 
 // 기존 방식 (size - 1 필요)
-for (i in 0..features.size - 1) { /* ... */ }
+for (i in 0..features.size - 1) { /* ... */
+}
 
 // 열린 범위 방식 (size 그대로 사용 가능, 더 직관적임)
 for (i in 0..<features.size) {
@@ -164,7 +167,310 @@ fun main() {
 
 # 10장. 고차 함수
 
-`고차 함수`란 다른 함수를 인자로 받거나 함수를 반환하는 함수이다.
+## 고차 함수 개념 및 만드는 방법
+
+`고차 함수`란 다른 함수를 **인자로 받거나** 또는 **함수를 반환하는** 함수이다.
+코틀린에서는 함수를 변수처럼 다룰 수 있기 때문에(일급 객체), 람다나 함수 참조를 통해 함수를 값으로 주고받을 수 있다.
+
+### 함수 타입 정의
+
+고차 함수를 정의하려면 먼저 전달받을 "함수의 규격"인 함수 타입을 선언해야 한다.
+
+- 기본 문법: `(파라미터 타입) -> 반환 타입`
+    - (Int, String) -> Unit: Int와 String을 받아 아무것도 반환하지 않는 함수.
+    - () -> Unit: 인자가 없고 반환값도 없는 함수.
+
+- Nullable 함수 타입: 함수 타입 전체가 null이 될 수 있다면 괄호로 감싸고 물음표를 붙인다.
+    - ((Int, Int) -> Int)? = null
+
+### 고차 함수 구현 및 호출
+
+고차 함수는 공통적인 실행 흐름(틀)을 정의하고, 변화하는 부분(로직)은 외부에서 주입받는 전략 패턴과 유사하다.
+
+```kotlin
+// predicate라는 이름으로 (Char) -> Boolean 타입의 함수를 받는다.
+fun String.filter(predicate: (Char) -> Boolean): String {
+    val sb = StringBuilder()
+    for (index in 0..<length) {
+        val element = get(index)
+        // 인자로 받은 'predicate' 함수를 호출하여 조건을 검사한다.
+        if (predicate(element)) {
+            sb.append(element)
+        }
+    }
+    return sb.toString()
+}
+
+// 사용 예시: "대문자만 남겨줘"라는 로직을 람다로 전달
+println("Kotlin123".filter { it in 'A'..'Z' }) // 결과: K
+```
+
+위와 같이 고차함수는 "틀"만 만들어두고, 구체적인 로직(함수)은 외부에서 주입받는 것이다.
+
+- filter는 "문자열을 돌면서 담는다"는 틀만 갖고 있고, "어떤 문자를 담을지"는 외부에서 predicate라는 함수로 결정해서 넘겨주는 원리다.
+
+### 함수 타입 파라미터의 기본값과 널 처리
+
+자바에서는 전략 패턴 등을 위해 인터페이스를 구현해야 했지만, 코틀린에서는 함수 타입의 기본값을 지정해 코드를 훨씬 단순화할 수 있다.
+
+함수 타입에 기본값 지정하기
+
+- joinToString 예제처럼 transform 로직을 기본적으로 제공하면서, 필요한 경우에만 사용자가 직접 정의하도록 할 수 있다.
+
+```kotlin
+fun <T> Collection<T>.joinToString(
+    separator: String = ", ",
+    prefix: String = "",
+    postfix: String = "",
+    transform: (T) -> String = { it.toString() }
+): String {
+    val result = StringBuilder(prefix)
+
+    for ((index, element) in this.withIndex()) {
+        if (index > 0) result.append(separator)
+        // transform 함수를 호출하여 요소를 문자열로 변환 
+        result.append(transform(element))
+    }
+
+    result.append(postfix)
+    return result.toString()
+}
+
+fun main() {
+    val letters = listOf("Alpha", "Beta")
+    println(letters.joinToString()) // Alpha, Beta
+    println(letters.joinToString { it.lowercase() }) // alpha, beta
+    println(
+        letters.joinToString(separator = "! ", postfix = "! ",
+            transform = { it.uppercase() })
+    ) // ALPHA! BETA! 
+}
+```
+
+### 함수를 함수에서 반환하기
+
+함수를 반환하는 고차 함수는 "조건에 따라 로직 자체를 선택해서 내보낼 때" 매우 유용하다.
+
+- 실무적인 예시: 배송비 계산, 세금 계산 등 프로그램의 상태에 따라 계산식(로직) 자체가 바뀌어야 하는 경우.
+
+```kotlin
+// NOTE 10.7
+enum class Delivery { STANDARD, EXPEDITED }
+
+class Order(val itemCount: Int)
+
+// Delivery 타입에 따라 '어떤 함수'를 사용할지 결정해서 반환한다.
+fun getShippingCostCalculator(delivery: Delivery): (Order) -> Double {
+    if (delivery == Delivery.EXPEDITED) {
+        return { order -> 6 + 2.1 * order.itemCount } // 특송 계산 로직 반환
+    }
+    return { order -> 1.2 * order.itemCount } // 일반 계산 로직 반환
+}
+
+fun main() {
+    val calculator = getShippingCostCalculator(Delivery.EXPEDITED)
+    println("Shipping costs ${calculator(Order(3))}") // Shipping costs 12.3
+    // 만약 Delivery.STANDARD 이면 Shipping costs 3.5999999999999996
+}
+```
+
+### 람다를 활용한 중복 제거와 코드 재사용성
+
+아주 복잡한 구조를 만들어야만 피할 수 있는 코드 중복도 람다를 활용하면 간결하게 제거할 수 있다.
+람다를 사용하면 단순히 **값** 뿐만 아니라, 데이터를 다루는 **행동(로직) 자체**를 추출하여 재사용할 수 있기 때문이다.
+
+단계적 개선: 처음에는 특정 OS의 평균 방문 시간만 구하는 함수로 시작하지만, 요구사항이 늘어날수록 함수는 계속 늘어날 위험이 있다.
+
+- 1단계 (특정 값 기반): averageDurationFor(os: OS) — 오직 OS로만 필터링 가능.
+- 2단계 (복잡한 조건): 모바일 사용자(iOS, Android)나 특정 경로('/') 방문자의 평균을 구해야 한다면? 함수 내부 로직이 중복되기 시작한다.
+- 3단계 (고차 함수 기반): 필터링 조건 자체를 람다로 받아서 처리한다.
+
+아래와 같이 조건을 함수 타입 파라미터로 받으면,
+어떤 복잡한 필터링 요구사항이 와도 **단 하나의 함수**로 대응할 수 있다.
+
+```kotlin
+data class SiteVisit(
+    val path: String,
+    val duration: Double,
+    val os: OS
+)
+
+enum class OS { WINDOWS, LINUX, MAC, IOS, ANDROID }
+
+val log = listOf(
+    SiteVisit("/", 34.0, OS.WINDOWS),
+    SiteVisit("/", 22.0, OS.MAC),
+    SiteVisit("/login", 12.0, OS.WINDOWS),
+    SiteVisit("/signup", 8.0, OS.IOS),
+    SiteVisit("/", 16.3, OS.ANDROID),
+)
+
+// (고차 함수 적용 전)
+//fun List<SiteVisit>.averageDurationFor(os: OS) =
+//    filter { it.os == os }
+//        .map(SiteVisit::duration).average()
 
 
+// 핵심: '어떤 조건으로 필터링할 것인가'라는 행동(람다)을 인자로 받는다.
+// (SiteVisit) -> Boolean 타입의 함수를 인자로 받는 고차 함수
+fun List<SiteVisit>.averageDurationFor(predicate: (SiteVisit) -> Boolean) =
+    filter(predicate) // 주입받은 외부 로직(람다)으로 필터링을 수행함
+        .map(SiteVisit::duration)
+        .average()
 
+fun main() {
+    // 1. 특정 OS(WINDOWS) 필터링 로직을 주입
+    println(log.averageDurationFor { it.os == OS.WINDOWS }) // 23.0
+
+    // 2. 모바일 OS(IOS, ANDROID) 필터링 로직을 주입
+    val averageMobileDuration = log.averageDurationFor {
+        it.os in setOf(OS.IOS, OS.ANDROID)
+    }
+    println(averageMobileDuration) // 12.15
+
+    // 3. 특정 경로("/") 필터링 로직을 주입 (함수 하나로 모든 대응 가능!)
+    println(log.averageDurationFor { it.path == "/" }) // 24.1
+}
+```
+
+## 고차 함수의 성능 개선: inline 함수
+
+람다를 활용하면 코드가 간결해지지만, 내부적으로는 람다마다 익명 클래스 객체가 생성되는 오버헤드가 발생한다.
+코틀린은 이를 해결하기 위해 `inline` 변경자를 제공한다.
+
+> 호출 동작 과정 비교
+
+| 구분    | 일반적인 고차 함수 호출                     | 인라인 함수 호출 (inline)             |
+|-------|-----------------------------------|--------------------------------|
+| 객체 생성 | 람다 실행을 위해 **익명 클래스 객체를 매번 생성**한다. | 객체를 생성하지 않고 코드를 직접 삽입한다.       |
+| 바이트코드 | 함수 호출 명령어(`invoke`)가 포함된다.        | 함수 본문이 호출 지점의 바이트코드로 치환된다.     |
+| 실행 방식 | 새로운 스택 프레임을 생성하고 제어권을 넘긴다.        | 원래 코드의 일부인 것처럼 **순차적으로 실행**된다. |
+
+### 인라인이 작동하는 방식
+
+람다 본문과 함께 인라이닝 (Full Inlining)
+
+- 인라인 함수를 호출하면서 `람다 식({ ... })`을 직접 넘기면, 함수 본문과 전달된 람다의 본문이 **모두 호출 지점에 인라이닝**된다.
+    - 특징: 람다 본문이 인라인 함수의 일부로 간주되어 익명 클래스로 감싸지 않는다.
+    - 결과: 여러 곳에서 다른 람다로 호출하면, 각 호출 지점마다 서로 다른 코드가 따로따로 인라이닝된다.
+
+함수 타입 변수 전달 시 (Partial Inlining)
+
+- 아래 예시 코드는 인라인 함수를 호출할 때 람다 본문 대신 **함수 타입의 변수**를 넘기는 경우이다.
+
+```kotlin
+class LockOwner(val lock: Lock) {
+    fun runUnderLock(body: () -> Unit) { // body는 변수
+        synchronized(lock, body) // synchronized는 inline 함수
+    }
+}
+```
+
+- 한계: 컴파일 시점에 변수(body)에 어떤 로직이 들어올지 알 수 없다.
+- 결과: synchronized 함수의 본문은 호출 지점에 복사(인라이닝)되지만,
+    - **람다(body)는 일반적인 경우와 마찬가지로 호출된다**
+    - 즉, 객체 생성 방지 효과를 100% 누릴 수 없다.
+
+### 인라인 함수의 제약
+
+`inline`은 모든 경우에 사용할 수 있는 마법이 아니다.
+함수 본문에서 파라미터로 받은 람다를 어떻게 사용하는지에 따라 인라이닝이 불가능한 경우가 있다.
+
+- 람다를 다른 변수에 저장하거나 나중에 사용해야 하는 경우
+    - 인라인 함수의 본문에서 파라미터로 받은 람다를 호출하는 대신, 다른 변수에 저장하거나 다른 객체의 프로퍼티로 넘기는 경우에는 인라이닝을 할 수 없다.
+    - 이유: 람다 코드가 호출 지점에 펼쳐져야 하는데, 변수에 저장하려면 람다를 표현하는 **객체**가 어딘가에는 존재해야 하기 때문이다.
+- noinline 변경자
+    - 둘 이상의 람다를 인자로 받는 함수에서 특정 람다만 인라이닝을 금지하고 싶을 때 사용한다.
+    - 인라인 함수가 전달받은 람다를 인라이닝할 수 없는 방식으로 다룰 때 컴파일러는 `Illegal usage of inline-parameter` 오류를 보고하며,
+    - 이때 `noinline`을 붙여 해결할 수 있다.
+
+### 인라인을 언제 선언해야 할까
+
+inline 키워드를 사용한다고 해서 항상 성능이 좋아지는 것은 아니다. 그렇기에 신중히 결정해야 한다.
+
+- 일반 함수 호출은 이미 충분히 빠르다.
+    - JVM은 이미 강력한 인라이닝을 지원한다. 코드 실행을 분석하여 가장 이익이 되는 방향으로 호출을 인라이닝하며, 이는 JIT 컴파일 과정에서 일어난다.
+    - JVM 방식은 각 함수 구현이 바이트코드에 딱 한 번만 있으면 되지만, 코틀린의 inline은 모든 호출 지점에 코드를 복사하므로 **코드 중복**이 발생한다.
+- 람다를 인자로 받는 함수를 인라이닝할 때 이득이 큰 이유
+    - 함수 호출 비용뿐만 아니라 람다를 표현하는 클래스와 인스턴스 객체를 만들 필요가 없어진다.
+    - 현재의 JVM은 함수 호출과 람다를 코틀린의 inline만큼 똑똑하게 인라이닝해주지 못하는 경우가 많다.
+- 주의사항
+    - inline 변경자를 붙일 때는 **코드의 크기**에 주의해야 한다. 함수 본문이 크면 모든 호출 지점에 코드가 복사되어 전체 바이트코드 크기가 아주 커질 수 있다.
+    - 코틀린 표준 라이브러리의 인라인 함수들을 보면 대부분 크기가 아주 작다는 것을 알 수 있다.
+
+한마디로 정리하면, 인라인은 무분별한 최적화 도구가 아니라, **고차 함수의 오버헤드를 줄이기 위한 정교한 도구**다.
+
+### 자원 관리를 위한 인라인 함수 활용 (withLock, use, useLines)
+
+코틀린은 자원(파일, 락, DB 트랜잭션 등)을 획득하고 해제하는 반복적인 try/finally 패턴을 인라인 함수로 캡슐화하여 제공한다.
+
+- `withLock`: Lock 인터페이스의 확장 함수로, 락을 자동으로 획득하고 작업이 끝나면 안전하게 해제해준다.
+- `use`: Closeable 자원을 처리할 때 사용하며, 람다가 정상 종료되거나 예외가 발생하더라도 자원이 확실히 닫히도록 보장한다. (자바의 try-with-resources 문과 같은 역할을 수행한다.)
+- `useLines`: 파일의 각 줄을 시퀀스로 접근할 수 있게 해주어 대용량 파일도 효율적이고 코틀린답게 처리할 수 있다.
+
+## 람다 안에서의 흐름 제어 (return)
+
+람다 안에서 `return`을 사용하면 호출한 외부 함수까지 종료될 수 있다. 이를 제어하는 방법을 이해해야 한다.
+
+### 비로컬 반환
+
+람다 안에서 return을 사용하면 람다를 호출한 함수가 종료된다. 이는 **인라인 함수**에서만 가능하다.
+
+- 인라인 함수는 컴파일 시 함수 본문이 호출 지점에 복사되므로,
+- 람다 안의 return이 컴파일되면 결국 자신을 둘러싼 함수를 종료시키는 return이 되기 때문이다.
+
+```kotlin
+fun lookForAlice(people: List<Person>) {
+    people.forEach {
+        if (it.name == "Alice") {
+            println("Found!")
+            return // lookForAlice 함수 자체를 종료시킴 (비로컬 반환)
+        }
+    }
+    println("Alice is not found") // Alice를 찾으면 이 문장은 실행되지 않음
+}
+```
+
+### 로컬 반환
+
+람다 안에서만 실행을 멈추고 싶다면, **레이블**을 사용해야 한다.
+
+- 사용법: 람다식 앞에 `이름@`를 붙이고, `return@이름`으로 반환한다.
+- 암시적 레이블: 람다를 인자로 받는 함수의 이름(예: forEach)을 레이블로 사용할 수도 있다.
+
+```kotlin
+fun lookForAlice(people: List<Person>) {
+    // 명시적 레이블 사용
+    people.forEach label@{ // 레이블 정의
+        if (it.name == "Alice") return@label // 정의한 레이블로 로컬 반환
+    }
+
+    // 암시적 레이블 사용
+    people.forEach {
+        if (it.name == "Alice") return@forEach
+    }
+}
+```
+
+### 익명 함수: 로컬 반환의 대안
+
+레이블은 코드가 복잡해지면 가독성이 떨어질 수 있다.
+이때는 익명 함수를 사용하면 일반 함수처럼 `return`이 해당 익명 함수만 종료시킨다.
+
+- 익명 함수는 일반 함수와 비슷해 보이지만 이름이 없으며, `return`은 가장 가까운 `fun` 키워드로 정의된 함수를 종료시킨다는 규칙을 따른다.
+
+```kotlin
+fun lookForAlice(people: List<Person>) {
+    people.forEach(fun(person) { // 익명 함수 사용
+        if (person.name == "Alice") return // 가장 가까운 fun인 익명 함수만 종료 (로컬 반환)
+        println("${person.name} is not Alice")
+    })
+}
+```
+
+로컬 반환을 만드는 두가지 방법은 아래 표와 같다.
+
+| 방법       | 문법 (Syntax)              | 특징                                                          |
+|----------|--------------------------|-------------------------------------------------------------|
+| 람다 + 레이블 | `return@forEach`         | 람다의 현재 실행(이번 회차)만 끝내고 다음 요소로 넘어간다. (자바의 `continue`와 유사)     |
+| 익명 함수    | `fun(person) { return }` | 람다 대신 함수를 통째로 넘기는 형태다. `return`이 익명 함수만 종료시키므로 루프가 계속 유지된다. |
