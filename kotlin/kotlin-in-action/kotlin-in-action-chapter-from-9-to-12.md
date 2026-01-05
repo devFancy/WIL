@@ -1,4 +1,4 @@
-# Kotlin in Action 2/E, 5-8장
+# Kotlin in Action 2/E
 
 > 이 글은 [Kotlin IN Action 2/E](https://product.kyobobook.co.kr/detail/S000215768644) 책을 읽고 개인 생각과 학습 테스트를 포함하여 정리한 내용입니다.
 
@@ -62,11 +62,71 @@
 
 ## 컬렉션과 범위 관련 관례
 
-- in 연산자: 객체가 컬렉션이나 범위에 포함되는지 검사한다. (contains 함수와 연결)
+- `in` 연산자: 객체가 컬렉션이나 범위에 포함되는지 검사한다. (`contains` 함수와 연결)
 
-- ..< 연산자 (Open Range): 1.9 버전부터 정식 도입된 열린 범위 연산자다.
+- `..<` 연산자 (Open Range): 1.9 버전부터 정식 도입된 열린 범위 연산자다.
     - 상계(마지막 값)를 포함하지 않는 범위를 만들 때 사용한다.
-    - `rangeTo` 연산자는 닫힌 범위를, `rangeUntil` 연산자는 상계 값을 포함하지 않는 열린 범위를 만든다.
+    - `rangeTo` 연산자는 닫힌 범위를, `rangeUntil` 연산자는 열린 범위(상계 미포함)를 만든다.
+
+> 정수 범위 비교: .. vs ..<
+
+리스트의 인덱스나 특정 경계값 직전까지의 범위를 다룰 때 유용하다.
+
+```kotlin
+fun main() {
+    // 1. rangeTo (..): 닫힌 범위 (10 포함)
+    val closedRange = 1..10
+    println("Closed: " + closedRange.joinToString()) 
+    // result: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+
+    // 2. rangeUntil (..<): 열린 범위 (10 미포함)
+    val openRange = 1..<10
+    println("Open: " + openRange.joinToString()) 
+    // result: 1, 2, 3, 4, 5, 6, 7, 8, 9
+}
+```
+
+> 리스트 인덱스 순회
+
+기존에는 리스트의 마지막 인덱스까지 순회하기 위해 0`..list.size - 1`를 사용했지만,
+`..<`를 사용하면 더 직관적으로 표현할 수 있다.
+
+```kotlin
+val features = listOf("Operator", "Convention", "Destructuring")
+
+// 기존 방식 (size - 1 필요)
+for (i in 0..features.size - 1) { /* ... */ }
+
+// 열린 범위 방식 (size 그대로 사용 가능, 더 직관적임)
+for (i in 0..<features.size) {
+    println("Feature $i: ${features[i]}")
+}
+```
+
+> 내부 동작: rangeTo와 rangeUntil
+
+연산자는 내부적으로 특정 함수 호출로 변환되므로, 필요에 따라 직접 함수를 호출할 수도 있다.
+
+| 연산자   | 대응하는 함수(관례)  | 특징                 |
+|-------|--------------|--------------------|
+| `..`  | `rangeTo`    | 마지막 값(상계)을 포함함     |
+| `..<` | `rangeUntil` | 마지막 값(상계)을 포함하지 않음 |
+
+```kotlin
+val start = 0
+val end = 5
+
+// 연산자 사용 방식
+val r1 = start..end        // 내부적으로 start.rangeTo(end) 호출
+val r2 = start..<end       // 내부적으로 start.rangeUntil(end) 호출
+
+// 직접 함수 호출 방식 (결과는 위와 동일)
+val r3 = start.rangeTo(end)
+val r4 = start.rangeUntil(end)
+
+println(r1 == r3) // true
+println(r2 == r4) // true
+```
 
 ## 구조 분해 선언 (Destructuring Declaration)
 

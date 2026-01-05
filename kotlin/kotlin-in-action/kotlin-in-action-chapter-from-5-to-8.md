@@ -1,4 +1,4 @@
-# Kotlin in Action 2/E, 5-8장
+# Kotlin in Action 2/E
 
 > 이 글은 [Kotlin IN Action 2/E](https://product.kyobobook.co.kr/detail/S000215768644) 책을 읽고 개인 생각과 학습 테스트를 포함하여 정리한 내용입니다.
 
