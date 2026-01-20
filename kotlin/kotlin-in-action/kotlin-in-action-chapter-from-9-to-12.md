@@ -19,6 +19,13 @@
     - [고차 함수 개념 및 만드는 방법](#고차-함수-개념-및-만드는-방법)
     - [고차 함수의 성능 개선: Inline 함수](#고차-함수의-성능-개선-inline-함수)
     - [람다 안에서의 흐름 제어 (return)](#람다-안에서의-흐름-제어-return)
+- [11장. 제네릭스](#11장-제네릭스)
+    - [제네릭 타입 파라미터와 제약](#제네릭-타입-파라미터와-제약)
+    - [실행 시점 제네릭스: 소거와 실체화](#실행-시점-제네릭스-소거와-실체화) 
+    - [변성 (Variance): 기저 타입과 타입 인자의 관계](#변성-variance-기저-타입과-타입-인자의-관계)
+    - [사용 지점 변성 (Use-site Variance)](#사용-지점-변성-use-site-variance)
+
+
 ---
 
 # 9장. 연산자 오버로딩과 다른 관례
@@ -241,7 +248,8 @@ fun main() {
     println(letters.joinToString()) // Alpha, Beta
     println(letters.joinToString { it.lowercase() }) // alpha, beta
     println(
-        letters.joinToString(separator = "! ", postfix = "! ",
+        letters.joinToString(
+            separator = "! ", postfix = "! ",
             transform = { it.uppercase() })
     ) // ALPHA! BETA! 
 }
@@ -474,3 +482,180 @@ fun lookForAlice(people: List<Person>) {
 |----------|--------------------------|-------------------------------------------------------------|
 | 람다 + 레이블 | `return@forEach`         | 람다의 현재 실행(이번 회차)만 끝내고 다음 요소로 넘어간다. (자바의 `continue`와 유사)     |
 | 익명 함수    | `fun(person) { return }` | 람다 대신 함수를 통째로 넘기는 형태다. `return`이 익명 함수만 종료시키므로 루프가 계속 유지된다. |
+
+# 11장. 제네릭스
+
+자바와 마찬가지로 코틀린의 제네릭스는 타입 안정성을 보장하기 위해 도입되었지만,
+하위 호환성을 위해 로(raw) 타입을 허용하는 자바와 달리 코틀린은 처음부터 제네릭을 강제한다는 점이 다르다.
+
+## 제네릭 타입 파라미터와 제약
+
+### Raw 타입의 부재와 타입 추론
+
+코틀린은 자바 1.5 이전 버전과의 호환성 문제에서 자유롭기 때문에, 제네릭 타입의 인자를 항상 명시하거나 컴파일러가 추론할 수 있어야 한다.
+
+- 타입 추론: `listOf("A", "B")`와 같이 값을 통해 컴파일러가 `List<String>`임을 추론한다.
+- 명시적 선언: 빈 리스트를 만들 때는 `val readers: MutableList<String> = mutableListOf()` 처럼 타입을 명시해야 한다.
+
+### 타입 파라미터 제약
+
+제네릭 함수나 클래스에서 사용할 수 있는 타입의 범위를 제한할 수 있다.
+
+- 상계(Upper Bound) 지정: 자바의 `extends`와 유사하게 `:`을 사용한다.
+
+(`상계`라는 말 대신 "상한선(제한선)" 혹은 "이 부모의 자식들만 들어와" 라고 생각하면 쉽다.)
+
+```kotlin
+// Number의 하위 타입만 허용 - "T는 무조건 Number의 자식이어야 해!" (Int, Double, Float 등 통과)
+fun <T : Number> oneHalf(value: T): Double {
+    return value.toDouble() / 2.0
+}
+```
+
+- 다중 제약 (where): 타입 파라미터가 둘 이상의 인터페이스나 클래스를 구현해야 할 경우 `where` 절을 사용한다.
+
+```kotlin
+// "T는 CharSequence(읽기) 기능도 있어야 하고, 동시에 Appendable(쓰기) 기능도 있어야 해!"
+fun <T> ensureTrailingPeriod(seq: T) where T : CharSequence, T : Appendable {
+    // CharSequence 덕분에 endsWith 사용 가능
+    if (!seq.endsWith('.')) {
+        // Appendable 덕분에 append 사용 가능
+        seq.append('.')
+    }
+}
+```
+
+- Null 가능성 제어: 기본적으로 제네릭 <T>는 `<T: Any?>`와 같아서 **null을 허용**합니다. null을 허용하지 않으려면 `<T : Any>`로 상계를 지정해야 한다.
+
+## 실행 시점 제네릭스: 소거와 실체화
+
+JVM의 제네릭스는 **타입 소거** 방식을 사용합니다. 즉, 실행 시점에는 List<String>이나 List<Int>나 모두 단순한 `List` 객체로 취급된다.
+
+### 타입 소거의 한계와 스타 프로젝션
+
+실행 시점에 타입 인자가 지워지기 때문에(List<String>인지 List<Int>인지 모름), is 검사를 통해 구체적인 제네릭 타입을 확인할 수 없다.
+
+- 스타 프로젝션(*): "어떤 정해진 타입이 있긴 한데, 정확히 뭔지는 모른다"는 것을 표현한다. 자바의 List<?>와 유사하다.
+  - if (value is List<*>): 리스트인지는 확인할 수 있지만, 원소 타입은 모른다.
+  - as? List<String>: 캐스팅은 가능하지만, 컴파일러가 Unchecked cast 경고를 띄운다. 실행 시점에는 성공하더라도 나중에 잘못된 타입의 원소를 꺼낼 때 예외가 발생할 수 있다.
+  - 쓰기는 불가능하고 읽기만 가능하다.
+
+```kotlin
+fun checkList(list: MutableList<*>) {
+  // 1. 읽기: 가능 (뭐가 들어있든 최소한 Any?인 건 확실하니까)
+  val item = list.get(0)
+
+  // 2. 쓰기: 불가능 (이 리스트가 Int 리스트면 String을 넣으면 안 되니까)
+  // list.add("Hello") // 컴파일 에러!
+}
+```
+
+### 실체화된 타입 파라미터 (Reified)
+
+코틀린은 `inline` 함수의 특성을 이용해 타입 정보를 실행 시점까지 유지할 수 있는 기법을 제공한다.
+이를 실체화된(Reified) 타입 파라미터라고 한다.
+- 작동 원리: 함수를 `inline`으로 선언하면 컴파일러가 함수 본문을 호출 지점에 그대로 갖다 붙인다. 이때 제네릭 타입 파라미터 대신 구체적인 타입을 바이트코드에 심어버리기 때문에 실행 시점에도 타입 정보를 알 수 있다.
+- 활용: 타입 검사(`is`), 캐스팅(`as`), 리플렉션 객체(`::class`) 사용이 가능하다.
+
+```kotlin
+// inline과 reified 키워드 필수
+inline fun <reified T> isA(value: Any) = value is T
+
+fun main() {
+    println(isA<String>("abc")) // true
+    println(isA<Int>("abc"))    // false
+}
+```
+
+아래와 같이 ObjectMapper 쓸 때 Reified 사용하면 타입을 인자로 넘기는 척만 해도 된다.
+
+```kotlin
+inline fun <reified T> parseJson(json: String): T {
+    // T::class.java에 접근 가능! 왜? 컴파일러가 T를 User로 바꿔치기 해주니까.
+    return objectMapper.readValue(json, T::class.java) 
+}
+val user = parseJson<User>(json) // 깔끔함
+```
+
+## 변성 (Variance): 기저 타입과 타입 인자의 관계
+
+변성은 기저 타입이 같고 타입 인자가 다른 여러 타입(예: List<String> vs List<Any>)이 서로 어떤 하위 타입 관계를 갖는지 설명하는 개념이다.
+
+쉽게 말해 "구성 요소의 상속 관계가, 껍데기(제네릭)의 상속 관계로 이어지는가?"를 정의하는 규칙이다.
+
+### 하위 클래스 (Subclass) vs 하위 타입 (Subtype)
+
+- 하위 클래스: 상속 관계 (Int는 Number의 하위 클래스).
+- 하위 타입: 어떤 타입 A의 값이 필요한 모든 곳에 타입 B의 값을 넣어도 문제가 없다면, B는 A의 하위 타입이다.
+  - 중요: 널이 될 수 없는 타입(Int)은 널이 될 수 있는 타입(Int?)의 하위 타입이다. (`Int` 값을 `Int?` 변수에 넣을 수 있음)
+
+### 공변성 (Covariance): out - 읽기 전용
+
+"생산자(Producer)는 `out`이다." "자식은 부모가 될 수 있다."
+
+- 개념: A가 B의 하위 타입일 때, Producer<A>도 Producer<B>의 하위 타입이 유지된다. -> 자식 타입 상자(List<String>)를 부모 타입 상자(List<Any>)로 취급해도 되나? -> YES
+- 키워드: `out T`
+- 조건: T는 오직 **반환 타입(아웃 위치)** 에만 쓰여야 한다.
+- 예시: `List<out T>` (읽기 전용 리스트)
+
+```kotlin
+// String은 Any의 하위 타입이므로, List<String>은 List<Any>의 하위 타입이다.
+val strings: List<String> = listOf("a", "b")
+val objects: List<Any> = strings // 가능 (공변성)
+```
+
+### 반공변성 (Contravariance): in - 쓰기 전용
+
+"소비자(Consumer)는 `in`이다." "부모는 자식을 대신할 수 있다."
+
+- 개념: A가 B의 하위 타입일 때, 관계가 역전되어 Consumer<B>가 Consumer<A>의 하위 타입이 된다. -> 부모 타입 처리기(Comparator<Any>)를 자식 타입 처리기(Comparator<String>)로 써도 되나? -> YES
+- 키워드: `in T`
+- 조건: T는 오직 파라미터 타입에만 쓰여야 한다.
+- 예시: `Comparator<in T>`
+
+```kotlin
+// Any를 비교할 수 있는 놈은 String도 비교할 수 있다.
+val anyComparator = Comparator<Any> { a, b ->
+  a.hashCode() - b.hashCode()
+}
+val strComparator: Comparator<String> = anyComparator // 가능 (반공변성)
+
+fun main() {
+  val names = listOf("Charlie", "Alice", "Bob")
+  // sortedWith는 Comparator<String>을 원하지만, Comparator<Any>를 넣어도 작동함
+  println(names.sortedWith(anyComparator))
+}
+```
+
+> 변성 정리표
+
+| **변성** | **키워드** | **역할**           | **타입 관계**                          | **예시**                   |
+|--------|---------|------------------|------------------------------------|--------------------------|
+| 공변성    | `out`   | 생산자 (Read-only)  | 유지됨 (`List<String>` ⊂ `List<Any>`) | `List`, `Iterator`       |
+| 반공변성   | `in`    | 소비자 (Write-only) | 뒤집힘 (`Comp<Any>` ⊂ `Comp<String>`) | `Comparator`, `Consumer` |
+| 무공변성   | 없음      | 읽기/쓰기 모두         | 관계없음 (서로 다름)                       | `MutableList`            |
+
+
+## 사용 지점 변성 (Use-site Variance)
+
+클래스 선언 시점에 변성을 지정하지 못했더라도(예: MutableList), 사용하는 시점에 변성을 제한할 수 있다. 
+이를 타입 프로젝션(Type Projection)이라 한다.
+
+```kotlin
+// source에서는 읽기만 할 것이므로 out 프로젝션 적용
+fun <T> copyData(source: MutableList<out T>, dest: MutableList<T>) {
+    // source.add() 같은 쓰기 메서드는 호출 불가
+    for (item in source) {
+        dest.add(item)
+    }
+}
+
+val strings = mutableListOf("A", "B")
+val objects = mutableListOf<Any>()
+
+// 원래라면 MutableList<String>을 MutableList<Any> 파라미터에 못 넣음.
+// 하지만 'out Any'로 선언했기 때문에 "String 리스트도 읽기 전용으로는 받을게"가 성립됨.
+copy(strings, objects)
+```
+
+이 기능은 자바의 List<? extends T>와 완전히 동일한 역할을 한다.
