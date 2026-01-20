@@ -24,6 +24,10 @@
     - [실행 시점 제네릭스: 소거와 실체화](#실행-시점-제네릭스-소거와-실체화) 
     - [변성 (Variance): 기저 타입과 타입 인자의 관계](#변성-variance-기저-타입과-타입-인자의-관계)
     - [사용 지점 변성 (Use-site Variance)](#사용-지점-변성-use-site-variance)
+- [12장. 어노테이션과 리플랙션](#12장-어노테이션과-리플랙션)
+    - [어노테이션 선언과 적용](#어노테이션-선언과-적용)
+    - [리플렉션](#리플렉션)
+    - [직렬화와 역직렬화](#직렬화와-역직렬화-)
 
 
 ---
@@ -595,7 +599,7 @@ val user = parseJson<User>(json) // 깔끔함
 
 - 개념: A가 B의 하위 타입일 때, Producer<A>도 Producer<B>의 하위 타입이 유지된다. -> 자식 타입 상자(List<String>)를 부모 타입 상자(List<Any>)로 취급해도 되나? -> YES
 - 키워드: `out T`
-- 조건: T는 오직 **반환 타입(아웃 위치)** 에만 쓰여야 한다.
+- 조건: T는 오직 반환 타입(아웃 위치)에만 쓰여야 한다.
 - 예시: `List<out T>` (읽기 전용 리스트)
 
 ```kotlin
@@ -629,11 +633,11 @@ fun main() {
 
 > 변성 정리표
 
-| **변성** | **키워드** | **역할**           | **타입 관계**                          | **예시**                   |
-|--------|---------|------------------|------------------------------------|--------------------------|
-| 공변성    | `out`   | 생산자 (Read-only)  | 유지됨 (`List<String>` ⊂ `List<Any>`) | `List`, `Iterator`       |
-| 반공변성   | `in`    | 소비자 (Write-only) | 뒤집힘 (`Comp<Any>` ⊂ `Comp<String>`) | `Comparator`, `Consumer` |
-| 무공변성   | 없음      | 읽기/쓰기 모두         | 관계없음 (서로 다름)                       | `MutableList`            |
+| 변성 | 키워드 | 역할           | 타입 관계                         | 예시                   |
+|----|-----|--------------|-------------------------------|----------------------|
+| 공변성 | `out` | 생산자 (Read-only) | 유지됨 (`List<String>` ⊂ `List<Any>`) | `List`, `Iterator`   |
+| 반공변성 | `in` | 소비자 (Write-only) | 뒤집힘 (`Comp<Any>` ⊂ `Comp<String>`) | `Comparator`, `Consumer` |
+| 무공변성 | 없음  | 읽기/쓰기 모두     | 관계없음 (서로 다름)                  | `MutableList`        |
 
 
 ## 사용 지점 변성 (Use-site Variance)
@@ -659,3 +663,140 @@ copy(strings, objects)
 ```
 
 이 기능은 자바의 List<? extends T>와 완전히 동일한 역할을 한다.
+
+
+# 12장. 어노테이션과 리플랙션
+
+## 어노테이션 선언과 적용
+
+### 어노테이션 적용과 인자
+
+코틀린의 어노테이션 적용 문법은 자바와 거의 동일(@)하지만, 인자를 넘기는 방식에서 코틀린만의 특징이 있다.
+- 클래스 참조: ::class를 사용한다. (@MyAnnotation(MyClass::class))
+- 배열: arrayOf를 쓰거나 대괄호 []를 사용할 수 있다. (@RequestMapping(path = ["/foo", "/bar"]))
+- 프로퍼티 사용: 컴파일 시점에 알 수 있는 const val 프로퍼티만 인자로 쓸 수 있다.
+
+```kotlin
+const val TEST_TIMEOUT = 100L
+@Timeout(TEST_TIMEOUT) fun testMethod() { }
+```
+
+### 사용 지점 타깃
+
+코틀린의 프로퍼티 선언(val/var)은 컴파일되면 자바의 필드, 게터, 세터 등 여러 요소로 변환된다. 
+따라서 어노테이션이 "정확히 어디에 붙어야 하는지" 명시해야 할 때가 있다.
+
+- 문법: @타깃:어노테이션이름
+- 주요 타깃 목록:
+  - file: 파일 수준의 선언 (패키지 선언 앞에서 사용) -> 자바에서 부를 파일명 변경할 때
+  - param: 생성자 파라미터에 어노테이션을 붙여야 하는 프레임워크 사용할 때.
+  - field: 백킹 필드 (자바 필드에 붙음) -> 게터/세터 없이 필드를 노출하거나 DI 주입할 때.
+  - get / set: 게터/세터 메서드 -> 자바 호환성을 위해 메서드 이름을 바꿀 때.
+  - property: 프로퍼티 전체 (자바에서는 안 보임)
+
+```kotlin
+@file:JvmName("StringUtilUtils") // file: 이 파일의 클래스 이름을 변경 (자바에서 접근 시 유용)
+
+class User(
+    // param: 생성자 파라미터에만 어노테이션 적용 (주로 DI나 JSON 파싱 라이브러리에서 사용)
+    @param:JsonProperty("user_name") 
+    val name: String,
+
+    // field: 뒷받침하는 필드(Backing Field)에 직접 적용 (자바 필드에 붙음)
+    @field:Inject
+    val service: MyService
+) {
+    // get / set: 게터나 세터 메서드에 각각 적용
+    @get:JvmName("getUserAge") // 자바에서 호출 시 getAge() 대신 getUserAge()로 보임
+    @set:JvmName("setUserAge") // 자바에서 호출 시 setAge() 대신 setUserAge()로 보임
+    var age: Int = 0
+
+    // property: 프로퍼티 전체에 적용 (자바 바이트코드에는 직접 보이지 않으나, 코틀린 리플렉션 등에서 식별)
+    @property:Deprecated("이 프로퍼티는 더 이상 사용되지 않습니다.")
+    var oldField: String = ""
+}
+```
+
+### 어노테이션 선언
+
+`annotation class` 키워드를 사용한다. 본문은 가질 수 없으며, 파라미터는 항상 val이어야 한다.
+
+```kotlin
+@Target(AnnotationTarget.PROPERTY) // 메타 어노테이션: 적용 대상 지정
+@Retention(AnnotationRetention.RUNTIME) // 메타 어노테이션: 유지 범위 지정
+annotation class JsonExclude(val reason: String = "")
+```
+
+- 메타 어노테이션:
+  - @Target: 어노테이션을 붙일 수 있는 요소(클래스, 프로퍼티, 함수 등)를 지정한다.
+  - @Retention: 어노테이션 정보를 언제까지 유지할지 결정한다.
+
+## 리플렉션
+
+리플렉션은 실행 시점에 객체의 타입, 프로퍼티, 함수 등의 구조를 분석해내는 기법이다.
+코틀린 리플렉션 API는 KClass, KCallable 등을 중심으로 구성된다.
+
+### KClass: 코틀린 클래스 참조
+
+실행 시점에 클래스를 표현하는 객체로, 자바의 java.lang.Class에 대응된다.
+
+```kotlin
+val kClass: KClass<Person> = Person::class
+println(kClass.simpleName) // 클래스 이름 출력
+println(kClass.memberProperties) // 프로퍼티 목록 조회
+```
+
+### KCallable: 호출 가능 요소
+
+함수(KFunction)와 프로퍼티(KProperty)의 공통 상위 인터페이스이다. 
+call 메서드를 통해 해당 요소를 동적으로 호출할 수 있다.
+- call(vararg args): 인자를 리스트로 받아 함수나 게터를 호출한다. 타입 안전성을 보장하지 않으므로, 인자 개수나 타입이 틀리면 런타임 예외가 발생한다.
+
+### callBy: 디폴트 파라미터 지원
+
+리플렉션으로 함수나 생성자를 호출할 때 가장 중요한 메서드이다.
+- 문제점: call은 모든 인자를 다 넘겨야 하므로, 코틀린의 디폴트 파라미터(Default Arguments) 기능을 활용할 수 없다.
+- 해결 방안: (callBy): 파라미터(KParameter)와 값의 Map을 인자로 받는다. 맵에 인자가 누락되어 있다면 함수에 정의된 디폴트 값을 자동으로 사용한다.
+
+```kotlin
+// JSON 파싱 라이브러리 등에서 필수적으로 사용됨
+fun createObj(constructor: KFunction<*>, jsonMap: Map<String, Any?>) {
+    // JSON에 없는 필드는 맵에서 빠지게 되고, callBy가 알아서 디폴트 값을 채워줌
+    val params = constructor.parameters.associateWith { param -> 
+        jsonMap[param.name] 
+    }
+    return constructor.callBy(params)
+}
+```
+
+## 직렬화와 역직렬화 
+
+코틀린 객체의 프로퍼티를 순회하며 JSON 형태의 문자열({"key": "value"})을 만들어내는 과정을 설명한다.
+핵심은 리플렉션을 통해 **런타임에 클래스 구조를 파악하고 데이터를 변환한다는 점**이다.
+
+### 직렬화
+
+목표: 객체(Object) -> JSON 문자열 변환
+
+코틀린 객체의 프로퍼티를 순회하며 JSON 형태의 문자열(`{"key": "value"}`)을 만들어내는 과정입니다. StringBuilder를 확장하여 구현한다.
+
+1. 클래스 정보 획득
+2. 프로퍼티 순회
+3. 필터링
+4. 이름 결정
+5. 값 읽기
+6. 값 변환
+7. JSON 조립
+
+### 역직렬화
+
+목표: JSON 문자열 -> 객체(Object) 변환
+
+JSON 문자열을 파싱하여, 코틀린 객체를 생성하고 값을 채워 넣는 과정이다.
+직렬화보다 복잡하며, **생성자 호출**이 핵심이다.
+
+1. 어휘 분석 (Lexer) & 구문 분석 (Parser)
+2. 클래스 정보 캐싱
+3. 인자 매핑
+4. 객체 생성 (callBy) -> 핵심 (중요: call 대신 `callBy`를 쓰는 이유는, JSON에 없는 필드에 대해 코틀린의 디폴트 파라미터 값을 자동으로 적용하기 위해서이다.)
+5. 검증
