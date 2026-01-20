@@ -27,7 +27,6 @@
 - [12장. 어노테이션과 리플랙션](#12장-어노테이션과-리플랙션)
     - [어노테이션 선언과 적용](#어노테이션-선언과-적용)
     - [리플렉션](#리플렉션)
-    - [직렬화와 역직렬화](#직렬화와-역직렬화-)
 
 
 ---
@@ -597,7 +596,7 @@ val user = parseJson<User>(json) // 깔끔함
 
 "생산자(Producer)는 `out`이다." "자식은 부모가 될 수 있다."
 
-- 개념: A가 B의 하위 타입일 때, Producer<A>도 Producer<B>의 하위 타입이 유지된다. -> 자식 타입 상자(List<String>)를 부모 타입 상자(List<Any>)로 취급해도 되나? -> YES
+- 개념: A가 B의 하위 타입일 때, `Producer<A>`도 `Producer<B>`의 하위 타입이 유지된다. -> 자식 타입 상자(List<String>)를 부모 타입 상자(List<Any>)로 취급해도 되나? -> YES
 - 키워드: `out T`
 - 조건: T는 오직 반환 타입(아웃 위치)에만 쓰여야 한다.
 - 예시: `List<out T>` (읽기 전용 리스트)
@@ -612,7 +611,7 @@ val objects: List<Any> = strings // 가능 (공변성)
 
 "소비자(Consumer)는 `in`이다." "부모는 자식을 대신할 수 있다."
 
-- 개념: A가 B의 하위 타입일 때, 관계가 역전되어 Consumer<B>가 Consumer<A>의 하위 타입이 된다. -> 부모 타입 처리기(Comparator<Any>)를 자식 타입 처리기(Comparator<String>)로 써도 되나? -> YES
+- 개념: A가 B의 하위 타입일 때, 관계가 역전되어 `Consumer<B>`가 `Consumer<A>`의 하위 타입이 된다. -> 부모 타입 처리기(Comparator<Any>)를 자식 타입 처리기(Comparator<String>)로 써도 되나? -> YES
 - 키워드: `in T`
 - 조건: T는 오직 파라미터 타입에만 쓰여야 한다.
 - 예시: `Comparator<in T>`
@@ -633,12 +632,11 @@ fun main() {
 
 > 변성 정리표
 
-| 변성 | 키워드 | 역할           | 타입 관계                         | 예시                   |
-|----|-----|--------------|-------------------------------|----------------------|
-| 공변성 | `out` | 생산자 (Read-only) | 유지됨 (`List<String>` ⊂ `List<Any>`) | `List`, `Iterator`   |
-| 반공변성 | `in` | 소비자 (Write-only) | 뒤집힘 (`Comp<Any>` ⊂ `Comp<String>`) | `Comparator`, `Consumer` |
-| 무공변성 | 없음  | 읽기/쓰기 모두     | 관계없음 (서로 다름)                  | `MutableList`        |
-
+| 변성   | 키워드   | 역할               | 타입 관계                              | 예시                       |
+|------|-------|------------------|------------------------------------|--------------------------|
+| 공변성  | `out` | 생산자 (Read-only)  | 유지됨 (`List<String>` ⊂ `List<Any>`) | `List`, `Iterator`       |
+| 반공변성 | `in`  | 소비자 (Write-only) | 뒤집힘 (`Comp<Any>` ⊂ `Comp<String>`) | `Comparator`, `Consumer` |
+| 무공변성 | 없음    | 읽기/쓰기 모두         | 관계없음 (서로 다름)                       | `MutableList`            |
 
 ## 사용 지점 변성 (Use-site Variance)
 
@@ -769,12 +767,12 @@ fun createObj(constructor: KFunction<*>, jsonMap: Map<String, Any?>) {
 }
 ```
 
-## 직렬화와 역직렬화 
+### 직렬화와 역직렬화 
 
 코틀린 객체의 프로퍼티를 순회하며 JSON 형태의 문자열({"key": "value"})을 만들어내는 과정을 설명한다.
 핵심은 리플렉션을 통해 **런타임에 클래스 구조를 파악하고 데이터를 변환한다는 점**이다.
 
-### 직렬화
+#### 직렬화
 
 목표: 객체(Object) -> JSON 문자열 변환
 
@@ -788,7 +786,7 @@ fun createObj(constructor: KFunction<*>, jsonMap: Map<String, Any?>) {
 6. 값 변환
 7. JSON 조립
 
-### 역직렬화
+#### 역직렬화
 
 목표: JSON 문자열 -> 객체(Object) 변환
 
