@@ -30,4 +30,4 @@
 
 ## 3부. 코틀린과 플로우를 활용한 동시성 프로그래밍
 
-### [14-18장](https://github.com/devFancy/WIL/blob/main/kotlin/kotlin-in-action-chapter-from-14-to-18.md)
+### [14-18장](https://github.com/devFancy/WIL/blob/main/kotlin/kotlin-in-action/kotlin-in-action-chapter-from-14-to-18.md)
